@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+
+    <string name="app_name">Voice Assistant</string>
+
+    <string name="on_boarding_descrption">
+        כדי לפתוח אפליקציות בעזרת פעולות קוליות, עליך להשתמש תחילה במילה
+        <big><b>פתח</b></big>
+        או במילה
+         <big><b>open</b></big> .
+        לדוגמה
+    <big><b>פתח</b></big>
+    <big>את מחשבון</big>
+        או
+        <big><b>open</b></big>
+    <big>מחשבון</big>
+אם העוזר הקולי אינו יכול לפתוח אפליקציה בגלל זיהוי לקוי,
+        תוכל/י להוסיף אפליקציה זו על ידי לחיצה על כפתור התפריט ולאחר מכן על כפתור ההגדות.
+    </string>
+
+    <string name="delete_app_description">
+        אלו אפליקציות שהוספת במטרה לפתוח עם זיהוי פעולה קולית.
+        אם הינך מוחק אפלקיציה, היא לא תזוהה עם פעולות קוליות יותר.
+        אלא אם כן,היא תתווסף שוב לרשימה.
+    </string>
+    <string name="add_app_description">
+        אם העוזר הקולי אינו יכול לפתוח אפליקציה בגלל זיהוי לקוי , תוכל/י להוסיף אפליקציה זו על ידי בחירת אפליקציה מהרשימה למטה ולהקליט שם מתאים.
+        זה בסדר אם תוצאות העוזר הקולי הן עם שגיאות כתיב.
+        נסה/י להקליט מספר פעמים ובחר/י את התוצאה הטובה ביותר(התוצאה הכי שכיחה)
+    </string>
+
+    <string name="permission_required">יש צורך לתת הרשאה כדי לבצע פעולה זו.</string>
+    <string name="no_app_found">לא נמצאה אפליקציה , הינך יכול להוסיף אותה לרשימה.</string>
+    <string name="settings">הגדרות</string>
+    <string name="menu">תפריט</string>
+    <string name="dont_ask_again">מובן , אל תשאל שוב</string>
+    <string name="skip">דלג</string>
+    <string name="read_and_skip">האם קראת את המדריך למשתמש?</string>
+    <string name="important">חשוב!!</string>
+    <string name="add_app">הוסף אפליקציה</string>
+    <string name="how_to_use">מדריך למשתמש</string>
+    <string name="permission_ask_never_again">
+        אפשר/י דרך: הגדרות>יישומים>Voice Assistant>הרשאות>
+    </string>
+
+    <string-array name="operations_explanation">
+        <item>
+          \u2022 התקשר לדניאל פרץ \n
+         \u2022 תתקשר לאמא \n
+          \u2022 תקשר לאלי המורה לנהיגה
+        </item>
+        <item>\u2022 חפש הסרטים הכי טובים של השנה</item>
+        <item>
+            \u2022 פתח את מחשבון \n
+             Open מחשבון \u2022
+        </item>
+
+    </string-array>
+
+
+</resources>

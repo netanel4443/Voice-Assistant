@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/mainLayout"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent">
+                <Button
+                    android:id="@+id/floatingTalkImg"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:background="@drawable/ic_mic_white_background_24"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"/>
+                <Button
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:id="@+id/floatingMenu"
+                    android:background="@drawable/more_options"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toRightOf="@id/floatingTalkImg"
+                    android:layout_margin="5dp"
+                  />
+                <Button
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:id="@+id/floatingHelp"
+                    android:background="@drawable/ic_question_mark"
+                    android:visibility="gone"
+                    app:layout_constraintCircle="@id/floatingMenu"
+                    app:layout_constraintCircleRadius="70dp"
+                    app:layout_constraintCircleAngle="45"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toRightOf="@id/floatingSettingsButton"/>
+                <Button
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:id="@+id/closeServiceBtn"
+                    android:background="@drawable/ic_cancel_black_white_background"
+                    android:visibility="gone"
+                    app:layout_constraintCircle="@id/floatingMenu"
+                    app:layout_constraintCircleRadius="70dp"
+                    app:layout_constraintCircleAngle="135"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toRightOf="@id/floatingHelp"
+                    android:layout_margin="10dp"/>
+
+                <Button
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:id="@+id/floatingSettingsButton"
+                    android:visibility="gone"
+                    app:layout_constraintCircle="@id/floatingHelp"
+                    app:layout_constraintCircleRadius="70dp"
+                    app:layout_constraintCircleAngle="135"
+                    android:background="@drawable/ic_settings_black_white_background"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toRightOf="@id/floatingMenu"
+                    android:layout_marginLeft="10dp"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+</RelativeLayout>

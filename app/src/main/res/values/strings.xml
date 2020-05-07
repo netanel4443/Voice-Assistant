@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Voice Assistant</string>
+
+    <string name="delete_app_description">
+     These are apps you have added in order to open them with voice operation detection.
+     If you delete an app , it will not be recognized anymore with voice operations
+     unless you add it again.
+     </string>
+
+    <string name="add_app_description">
+     If voice assistant could not open an app because of poor recognition, you can add it by choosing an app from the list below and record an appropriate name.
+     It is OK if the voice assistant gave a result with spelling mistakes.
+     Try to record several times and choose the best result (the result you have seen the most).
+    </string>
+
+    <string name="no_app_found">App not found,you can add it to the list.</string>
+
+    <string name="on_boarding_descrption">
+     In order to open apps with voice operations ,first, you need to say the word <big><b>open</b></big>
+     and then the name of the app you want to open , for example : <big><b>open</b></big> Voice Assistant.
+     If Voice Assistant could not open an app because of poor recognition,
+     you can add it by clicking the menu button and then click on the settings button.
+     </string>
+    <string name="permission_required">A permission is required in order to do that operation.</string>
+    <string name="settings">settings</string>
+    <string name="menu">menu</string>
+    <string name="dont_ask_again">OK, do not ask again</string>
+    <string name="skip">Skip</string>
+    <string name="read_and_skip">Have you read the user manual?</string>
+    <string name="important">important!!</string>
+    <string name="add_app">Add app</string>
+    <string name="how_to_use">User Manual</string>
+    <string name="permission_ask_never_again">
+    Enable at Settings>Apps>Voice Assistant>Permissions>
+    </string>
+
+    <string-array name="operations_explanation">
+        <item>\u2022 Call Daniel</item>
+        <item>\u2022 Search best movies of the year</item>
+        <item>\u2022 Open calculator</item>
+    </string-array>
+
+
+    <integer-array name="operations_images">
+        <item>@drawable/ic_call_black_24dp</item>
+        <item>@drawable/ic_search_black_24dp</item>
+        <item>@drawable/ic_android_black_24dp</item>
+    </integer-array>
+</resources>

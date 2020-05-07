@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.e.VoiceAssistant">
+
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+
+
+    <application
+        android:name="com.e.VoiceAssistant.di.BaseApplication"
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="Voice Assistant"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        tools:ignore="GoogleAppIndexingWarning">
+        <activity android:name="com.e.VoiceAssistant.ui.splashScreen.WelcomeSplashActivity"
+                  android:theme="@style/Theme.AppCompat.Transparent.NoActionBar"  >
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name="com.e.VoiceAssistant.ui.activities.MainActivity"/>
+
+        <activity android:name="com.e.VoiceAssistant.ui.activities.PermissionsActivity"
+                  android:theme="@style/Theme.AppCompat.Transparent.NoActionBar"/>
+
+        <activity android:name="com.e.VoiceAssistant.ui.splashScreen.LoadingSplashScreen"
+                  android:theme="@style/Theme.AppCompat.Transparent.NoActionBar"  />
+
+        <activity android:name=".ui.onboarding.OnBoardingActivity" />
+
+        <service android:name="com.e.VoiceAssistant.ui.services.SpeechRecognizerService.SpeechRecognizerService"
+            android:exported="false"
+            android:enabled="true">
+        </service>
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-8194360858461012~8844399517" />
+    </application>
+
+</manifest>
