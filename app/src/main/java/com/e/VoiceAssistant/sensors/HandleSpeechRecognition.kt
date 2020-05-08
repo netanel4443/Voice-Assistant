@@ -43,6 +43,9 @@ class HandleSpeechRecognition(private val view:CommandsForSpeechListenerService)
 
     override fun onResults(results: Bundle?) {
         val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)!!
+            matches.forEach{
+            println("matches $it")
+        }
         view.changeTalkIcon()
         view.checkForResults(matches)
     }

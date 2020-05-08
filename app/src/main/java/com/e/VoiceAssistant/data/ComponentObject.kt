@@ -1,4 +1,4 @@
-package com.e.VoiceAssistant
+package com.e.VoiceAssistant.data
 
 data class ComponentObject(
     var activityName:String="",

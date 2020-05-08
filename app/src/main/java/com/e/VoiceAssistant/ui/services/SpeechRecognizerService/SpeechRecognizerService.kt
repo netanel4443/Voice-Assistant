@@ -13,9 +13,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.RelativeLayout
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.e.VoiceAssistant.ComponentObject
+import com.e.VoiceAssistant.data.ComponentObject
 import com.e.VoiceAssistant.R
 import com.e.VoiceAssistant.permissions.CheckOnlyPerrmission
 import com.e.VoiceAssistant.permissions.StartActivityToCheckPermission
@@ -39,8 +40,9 @@ import com.jakewharton.rxbinding.view.RxView
 import io.reactivex.Observable
 import kotlinx.android.synthetic.main.floating_dark_screen.view.*
 import kotlinx.android.synthetic.main.floating_widget_layout.view.*
-import java.util.jar.Manifest
 import javax.inject.Inject
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 class SpeechRecognizerService : BaseService(), SpeechRecognizerServicePresenterState {
 
@@ -61,9 +63,13 @@ class SpeechRecognizerService : BaseService(), SpeechRecognizerServicePresenterS
     private lateinit var closeIcon: Button
     private lateinit var help: Button
     private lateinit var floatingRepresentOperationsDialog: FloatingRepresentOperationsDialog
+    private lateinit var darkImage : ImageView
+    private lateinit var menu : Button
+    private lateinit var talkBtn : Button
     private var appComponent = HashMap<String, ComponentObject>()
     private var concatList = HashMap<String, String>()
     private val TAG = "SpeechRecognizerService"
+
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
@@ -73,37 +79,33 @@ class SpeechRecognizerService : BaseService(), SpeechRecognizerServicePresenterS
         val shouldStop = intent?.getBooleanExtra("stop", false)
 
         val state=intent?.getStringExtra("state").toString()
-           // printMessage(TAG,"before when")
 
         when(state){
             "ADD"->{
             val activityName= intent?.getStringExtra("activityName").toString()
             val pckg= intent?.getStringExtra("package").toString()
             val name= intent?.getStringExtra("name")
-//                printMessage(TAG,"before name")
-//                println("pckg $pckg")
-//                println("activity $activityName")
-                name?.let {
-                    val component = ComponentObject(activityName, pckg)
-                  //  printMessage(TAG,"inside name")
-                    appComponent[name]=component
 
+                name?.let {
+                    val component = ComponentObject(
+                        activityName,
+                        pckg
+                    )
+                        appComponent[name]=component
                 }
             }
+
             "REMOVE"->{
                 val name= intent?.getStringExtra("name")
-                name?.let { appComponent.remove(name) }
+                    name?.let { appComponent.remove(name) }
             }
         }
 
         shouldStop?.let {
-            if (shouldStop) {
-                stopSelf()
-            }
+            if (shouldStop) { stopSelf() }
         }
         return Service.START_NOT_STICKY
     }
-
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate() {
@@ -112,11 +114,6 @@ class SpeechRecognizerService : BaseService(), SpeechRecognizerServicePresenterS
         firstInits()
         initViews()
         initAppAndPackageList()
-
-        val darkImage = floatingDarkScreen.floatingDarkImage
-        val menu = floatingView.floatingMenu
-        val talkBtn = floatingView.floatingTalkImg
-
 
         +RxView.clicks(settings).throttle().subscribe {
             presenter.openSettingsActivity()
@@ -136,19 +133,20 @@ class SpeechRecognizerService : BaseService(), SpeechRecognizerServicePresenterS
 
         closeIcon.setOnClickListener { stopSelf() }
 
-        talkBtn.setOnTouchListener(MultiTouchListener{
+        talkBtn.setOnTouchListener(MultiTouchListener{ handleTalkBtnTouchEvents(it) })
+    }
 
-            when (it) {
-                is TouchHelper.moveEvent -> {
-                    params.x = it.xPos
-                    params.y = it.yPos
-                    windowManager.updateViewLayout(floatingView, params)
-                }
-                is TouchHelper.TalkOrStopClickEvent -> {
-                    presenter.handleTalkOrStopClick()
-                }
+    private fun handleTalkBtnTouchEvents(touchHelper: TouchHelper) {
+        when (touchHelper) {
+            is TouchHelper.moveEvent -> {
+                params.x = touchHelper.xPos
+                params.y = touchHelper.yPos
+                windowManager.updateViewLayout(floatingView, params)
             }
-        })
+            is TouchHelper.TalkOrStopClickEvent -> {
+                presenter.handleTalkOrStopClick()
+            }
+        }
     }
 
     private fun firstInits() {
@@ -162,7 +160,6 @@ class SpeechRecognizerService : BaseService(), SpeechRecognizerServicePresenterS
         val prefs = sharedPrefs.getBoolean("seen", false)
         if (!prefs) {
             val intent = Intent(this, OnBoardingActivity::class.java)
-            //  Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
             navigateToDesiredApp(intent)
         } else
             startLoginSplashScreen()
@@ -175,6 +172,9 @@ class SpeechRecognizerService : BaseService(), SpeechRecognizerServicePresenterS
         settings = floatingView.floatingSettingsButton
         help = floatingView.floatingHelp
         parenOfDarkImage = floatingDarkScreen.trashMainParent
+        darkImage = floatingDarkScreen.floatingDarkImage
+        menu = floatingView.floatingMenu
+        talkBtn = floatingView.floatingTalkImg
     }
 
     private fun startLoginSplashScreen() {
@@ -189,23 +189,19 @@ class SpeechRecognizerService : BaseService(), SpeechRecognizerServicePresenterS
     private fun initAppAndPackageList() {
 
         val first = ContactList().getContacts(this)
+            .doOnNext { setContactList(it) }
         val second = AppAndPackageList().init(this)
+            .doOnNext { setAppComponentList(it) }
         val third = presenter.initRecognizerIntent().toObservable()
+            .doOnNext { setIntent(it) }
 
         val observableList = listOf(first, second, third)
 
-        +Observable.combineLatest(observableList) {
-            val contactList = it[0] as HashMap<String, String>
-            val componentName = it[1] as HashMap<String, ComponentObject>
-            val intent = it[2] as Intent
-
-            setContactList(contactList)
-            setAppComponentList(componentName)
-            setIntent(intent)
-        }
+        +Observable.combineLatest(observableList) {}
             .subscribeOnIoAndObserveOnMain()
             .doOnComplete {//should happen on mainThread after inits are completed
                 presenter.initWindowManager()
+                initSpeechRecognizer()
                 closeLoginSplashScreen()
                 floatingRepresentOperationsDialog.show()
             }
@@ -298,10 +294,12 @@ class SpeechRecognizerService : BaseService(), SpeechRecognizerServicePresenterS
 
     override fun addAppsFromMemory(apps: HashMap<String, Pair<String, String>>) {
         apps.keys.forEach {
-            val name = ComponentObject(apps[it]!!.first, apps[it]!!.second)
+            val name = ComponentObject(
+                apps[it]!!.first,
+                apps[it]!!.second
+            )
             appComponent[it] = name
         }
-        initSpeechRecognizer()
     }
 
     override fun handleMenuClick(visibility: Int) {
@@ -321,9 +319,3 @@ class SpeechRecognizerService : BaseService(), SpeechRecognizerServicePresenterS
         talkIntent.destroy()
     }
 }
-
-
-
-
-
-

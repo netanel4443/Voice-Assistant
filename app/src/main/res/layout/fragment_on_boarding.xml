@@ -37,6 +37,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/onBoardingDescription"
         android:text="@string/on_boarding_descrption"
+        android:fontFamily="@font/davidlibre"
         android:lineSpacingExtra="5dp"
         android:textSize="18sp"
         android:layout_margin="10dp"
@@ -55,6 +56,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/onBoardingSettingsTview"
         android:text="@string/settings"
+        android:fontFamily="@font/davidlibre"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/onBoardingSettingsImgView"/>
@@ -73,6 +75,7 @@
             android:id="@+id/onBoardingMenuTview"
             android:textSize="15sp"
             android:text="@string/menu"
+            android:fontFamily="@font/davidlibre"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/onBoardingMenuImgView"/>
@@ -93,6 +96,7 @@
             android:id="@+id/onBoardingSkipTview"
             android:text="@string/skip"
             android:textSize="20sp"
+            android:fontFamily="@font/davidlibre"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/onBoardingMenuTview"
             android:layout_margin="15dp"/>

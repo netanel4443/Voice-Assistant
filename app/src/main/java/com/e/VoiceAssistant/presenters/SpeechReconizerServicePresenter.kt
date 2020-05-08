@@ -3,12 +3,13 @@ package com.e.VoiceAssistant.presenters
 import android.content.Intent
 import android.view.Gravity
 import android.view.View
-import com.e.VoiceAssistant.ComponentObject
+import com.e.VoiceAssistant.data.ComponentObject
 import com.e.VoiceAssistant.R
 import com.e.VoiceAssistant.presenters.presentersStates.SpeechRecognizerServicePresenterState
 import com.e.VoiceAssistant.usecases.PresenterUseCases
 import com.e.VoiceAssistant.utils.rxJavaUtils.subscribeOnIoAndObserveOnMain
 import com.e.VoiceAssistant.utils.rxJavaUtils.throttle
+import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -60,29 +61,21 @@ class SpeechReconizerServicePresenter@Inject constructor(
 
      fun getAppsList(appComponents:HashMap<String, ComponentObject>){
         +useCases.getAppsListFromDB()
+            .flatMap {
+                useCases.extractAddedAppsFromAppList(it,appComponents.keys )
+                    .doOnSuccess {
+                        addedApps=it.first
+                        appsToDelete=it.second
+                    }
+            }
+            .flatMap {  deleteNonExistApps().toSingleDefault(it)}
             .subscribeOnIoAndObserveOnMain()
-            .subscribe(
-                {
-                    +useCases.extractAddedAppsFromAppList(it,appComponents.keys )
-                        .subscribeOnIoAndObserveOnMain()
-                        .subscribe({
-                            addedApps=it.first
-                            view.addAppsFromMemory(addedApps)
-                            appsToDelete=it.second
-                            deleteNonExistApps()
-                        },{ //it.printStackTrace()
-                             })
-                },
-                { //it.printStackTrace()
-                })
+            .subscribe({ view.addAppsFromMemory(addedApps) },
+                       {/*it.printStackTrace()*/ })
     }
 
-    private fun deleteNonExistApps(){
-        +useCases.deleteApps(appsToDelete)
-            .subscribeOnIoAndObserveOnMain()
-            .subscribe({},{
-             //   it.printStackTrace()
-            })
+    private fun deleteNonExistApps():Completable{
+       return useCases.deleteApps(appsToDelete)
     }
 
 

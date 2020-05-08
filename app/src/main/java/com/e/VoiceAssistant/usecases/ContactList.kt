@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.provider.ContactsContract
 import com.e.VoiceAssistant.permissions.CheckOnlyPerrmission
+import com.e.VoiceAssistant.utils.printMessage
 import io.reactivex.Observable
 
 class ContactList {
@@ -43,7 +44,7 @@ class ContactList {
                     name = cursor.getString(nameIndex)
                     number = cursor.getString(numberIndex)
                     hMap[name]=number
-                 //   printMessage(" $name"," $number")
+                   // printMessage(" $name"," $number")
                 }
             }catch (e:Exception){}
             finally { cursor.close()}

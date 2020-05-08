@@ -14,9 +14,11 @@ import com.e.VoiceAssistant.utils.rxJavaUtils.throttle
 import com.e.VoiceAssistant.viewmodels.states.SettingsViewModelStates
 import io.reactivex.Single
 import io.reactivex.subjects.PublishSubject
+import java.util.*
 import javax.inject.Inject
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+import kotlin.collections.LinkedHashMap
 
 class SpeechRecognitionViewModel @Inject constructor(
     private val  useCases: SpeechRecognitionUseCases
@@ -74,12 +76,9 @@ class SpeechRecognitionViewModel @Inject constructor(
                     if (addedApps.isNotEmpty()){
                         addedApps[tmpNewName]=icon
                     }
-
                     addItemToAppList(tmpNewName,appToBeSaved.activity,appToBeSaved.pckg,icon)
                 },
-                {
-                    //   it.printStackTrace()
-                })
+                {/*   it.printStackTrace()*/ })
     }
 
     fun deleteAppFromList(name: String){
@@ -88,25 +87,19 @@ class SpeechRecognitionViewModel @Inject constructor(
             .doOnSubscribe { showDialog(View.VISIBLE) }
             .doOnTerminate { showDialog(View.INVISIBLE) }
             .subscribe(
-                {val icon=  addedApps[name]
+                {   addedApps[name]
                     addedApps.remove(name)
                     removeItemFromAppList(name)
                 },
-                {
-                    //   it.printStackTrace()
-                })
+                {/*   it.printStackTrace()*/ })
     }
 
     private fun removeItemFromAppList(name:String){
         state.value=SettingsViewModelStates.RemoveItemFromAppList(name)
     }
     private fun addItemToAppList( name:String, activityName:String, pckg:String, icon:Drawable?){
-        println("app to be saved pck ${pckg}")
-        println("app to be saved real ${name}")
-        println("app to be saved activity ${activityName}")
         state.value=SettingsViewModelStates.AddItemToAppList(name,activityName,pckg,icon)
     }
-
 
     fun getListOrCachedApplist(){
         if (addedApps.isEmpty()){
@@ -120,33 +113,30 @@ class SpeechRecognitionViewModel @Inject constructor(
         return MutableLiveData(addedApps)
     }
 
-    private fun getAppsList(){
+    private fun getAppsList() {
         +useCases.getAppsListFromDB()
+            .flatMap {
+                useCases.extractAddedAppsIconsFromAppList(it, appsDetailsHmap)
+            }
             .subscribeOnIoAndObserveOnMain()
             .doOnSubscribe { state.setValue(SettingsViewModelStates.ShowDialog(View.VISIBLE)) }
-            .subscribe(
-                {
-                    +useCases.extractAddedAppsIconsFromAppList(it,appsDetailsHmap)
-                        .subscribeOnIoAndObserveOnMain()
-                        .subscribe({
-                            addedApps=it.first
-                            appsToDelete=it.second
-                            state.setValue(SettingsViewModelStates.PassAppsToFragment(it.first))
-                            showDialog(View.INVISIBLE)
-                        },{//it.printStackTrace()
-                            showDialog(View.INVISIBLE) })
-                },
-                { //it.printStackTrace()
-                    showDialog(View.INVISIBLE)})
+            .subscribe({
+                println("${UUID.randomUUID()} number of times")
+                addedApps = it.first
+                appsToDelete = it.second
+                state.value = SettingsViewModelStates.PassAppsToFragment(it.first)
+                showDialog(View.INVISIBLE)
+            },
+            { showDialog(View.INVISIBLE) })
     }
 
     fun initCachedSettingsActivityUI(){
-        state.setValue( SettingsViewModelStates.GetCachedData(appsDetailsHmap,selectedApp,speechResultAppName))
+        state.value = SettingsViewModelStates.GetCachedData(appsDetailsHmap,selectedApp,speechResultAppName)
     }
 
     fun initSettingsActivityUI(list:HashMap<String, AppsDetails>) {
         appsDetailsHmap=list
-        state.setValue( SettingsViewModelStates.GetAppsDetails(list))
+        state.value = SettingsViewModelStates.GetAppsDetails(list)
     }
 
     fun handleTalkOrStopClick() {
@@ -168,5 +158,4 @@ class SpeechRecognitionViewModel @Inject constructor(
             clickSubject.onNext(SettingsViewModelStates.HandleClick(talkBtnIcon))
         }
     }
-
 }

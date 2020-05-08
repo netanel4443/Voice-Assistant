@@ -26,7 +26,5 @@ class LoadingSplashScreen : AppCompatActivity() {
    override fun onDestroy() {
        super.onDestroy()
        reciever.unregisterReceiver(broadcastReceiver)
-
-
    }
 }

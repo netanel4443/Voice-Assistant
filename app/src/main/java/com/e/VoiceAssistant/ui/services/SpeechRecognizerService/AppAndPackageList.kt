@@ -3,7 +3,7 @@ package com.e.VoiceAssistant.ui.services.SpeechRecognizerService
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ResolveInfo
-import com.e.VoiceAssistant.ComponentObject
+import com.e.VoiceAssistant.data.ComponentObject
 import io.reactivex.Observable
 import java.util.*
 

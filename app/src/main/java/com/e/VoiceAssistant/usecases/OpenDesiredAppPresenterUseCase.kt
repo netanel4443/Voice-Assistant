@@ -2,7 +2,7 @@ package com.e.VoiceAssistant.usecases
 
 import android.content.ComponentName
 import android.content.Intent
-import com.e.VoiceAssistant.ComponentObject
+import com.e.VoiceAssistant.data.ComponentObject
 
 class OpenDesiredAppPresenterUseCase {
 
@@ -47,7 +47,7 @@ class OpenDesiredAppPresenterUseCase {
         return  navigateToDesiredApp(pckg,appComponent)
         }
 
-    private fun navigateToDesiredApp(pckg: String,appComponent:HashMap<String,ComponentObject>): Intent {
+    private fun navigateToDesiredApp(pckg: String,appComponent:HashMap<String, ComponentObject>): Intent {
       //    println("pckggg $pckg")
             var intent = Intent()
 

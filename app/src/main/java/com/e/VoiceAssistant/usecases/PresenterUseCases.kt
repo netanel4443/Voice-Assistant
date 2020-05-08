@@ -6,13 +6,14 @@ import android.graphics.PixelFormat
 import android.net.Uri
 import android.os.Build
 import android.view.WindowManager
-import com.e.VoiceAssistant.ComponentObject
+import com.e.VoiceAssistant.data.ComponentObject
 import com.e.VoiceAssistant.data.SavedAppsDetails
 import com.e.VoiceAssistant.data.repo.RealmRepo
 import com.e.VoiceAssistant.di.annotations.ServiceScope
 import com.e.VoiceAssistant.usecases.commons.RecognizerIntentInit
 import io.reactivex.Completable
 import io.reactivex.Maybe
+import io.reactivex.Observable
 import io.reactivex.Single
 import java.util.*
 import javax.inject.Inject
@@ -118,46 +119,69 @@ class PresenterUseCases @Inject constructor(
     }
 
     private fun whichOperationToPerform(requiredOperation:String,
-                                splitedMatches:LinkedHashSet<String>,
-                                matches: ArrayList<String>,
-                                appComponent: HashMap<String, ComponentObject>,
-                                contactList: HashMap<String, String>):Intent{
+                                        splitedMatches:LinkedHashSet<String>,
+                                        matches: ArrayList<String>,
+                                        appComponent: HashMap<String, ComponentObject>,
+                                        contactList: HashMap<String, String>):Intent{
       return if(requiredOperation=="open"||requiredOperation=="אופן"||requiredOperation=="פתח"){
                     OpenDesiredAppPresenterUseCase().getDesiredIntent(appComponent,splitedMatches)
            }
            else if (requiredOperation=="התקשר"||requiredOperation=="תתקשר" ||
                     requiredOperation=="תקשר" || requiredOperation=="call"){
 
-                    callTo(matches[0],requiredOperation,contactList)
+                    callTo(matches,requiredOperation,contactList)
            }
            else  {
                     searchInWeb(matches[0],requiredOperation)
            }
     }
 
-    private fun callTo(stringToSearch:String,requiredOperation: String,contactList: HashMap<String, String>):Intent{
+    private fun callTo(stringToSearch:ArrayList<String>,requiredOperation: String,contactList: HashMap<String, String>):Intent{
         var operation=requiredOperation
-        var contactName:String?=""
-        if (Locale.getDefault().displayCountry=="ישראל")
-        {
-            operation=requiredOperation+" "+"ל"
-            contactName=stringToSearch.substring(stringToSearch.indexOf(operation,0)).run{
-               removePrefix(operation)
-               .removePrefix(" ")
-               .removeSuffix(" ")
-            }
-        }else
-            contactName=stringToSearch.substring(stringToSearch.indexOf(operation,0)).run {
-                replace(operation,"")
-                .removePrefix(" ")
-            }
+        var contactNamee:String?=""
+        var k=Observable.fromIterable(stringToSearch)
+            .map {stringToSearch->
+                var contactName:String?=""
+                if (Locale.getDefault().displayCountry=="ישראל")
+                {
+                    operation=requiredOperation+" "+"ל"
+                    contactName=stringToSearch.substring(stringToSearch.indexOf(operation,0)).run{
+                        removePrefix(operation)
+                            .removePrefix(" ")
+                            .removeSuffix(" ")
+                    }
+                }else
+                    contactName=stringToSearch.substring(stringToSearch.indexOf(operation,0)).run {
+                        replace(operation,"")
+                            .removePrefix(" ")
+                    }
+                contactName
+            }.filter { contactList.containsKey(it) }
+            .takeWhile{contactList.containsKey(it)==true}
+             .subscribe({
+                 contactNamee=contactList[it]
+                 println(it)
+             },{it.printStackTrace()})
+//        if (Locale.getDefault().displayCountry=="ישראל")
+//        {
+//            operation=requiredOperation+" "+"ל"
+//            contactName=stringToSearch.substring(stringToSearch.indexOf(operation,0)).run{
+//               removePrefix(operation)
+//               .removePrefix(" ")
+//               .removeSuffix(" ")
+//            }
+//        }else
+//            contactName=stringToSearch.substring(stringToSearch.indexOf(operation,0)).run {
+//                replace(operation,"")
+//                .removePrefix(" ")
+//            }
+//
+//            contactName=if (contactList[contactName]==null) { "" }
+//                        else { contactList[contactName] }
 
-            contactName=if (contactList[contactName]==null) { "" }
-                        else { contactList[contactName] }
-
-
+        println("concatname $contactNamee")
         val intent=Intent(Intent.ACTION_DIAL)
-        intent.data = Uri.parse("tel:$contactName")
+        intent.data = Uri.parse("tel:$contactNamee")
         return intent
     }
 
