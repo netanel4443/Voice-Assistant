@@ -5,8 +5,7 @@ import android.content.Intent
 import io.reactivex.Single
 import kotlin.collections.HashMap
 
-class DeviceAppsDetails {
-
+class DeviceAppsDetails(){
     fun getAppsDetails(context: Context):Single<HashMap<String,AppsDetails>>{
 
     return  Single.fromCallable {
@@ -21,12 +20,13 @@ class DeviceAppsDetails {
             launchables.forEach{resolveInfo ->
 
                 val activity = resolveInfo.activityInfo
-                val appname=activity.loadLabel(pm).toString().toLowerCase()
+                val appName=activity.loadLabel(pm).toString().toLowerCase()
                 val pckg=activity.name
                 val icon=resolveInfo.loadIcon(pm)
                 val activityName=  activity.applicationInfo.packageName
-                val appsDetails=AppsDetails(appname,pckg,activityName,icon)
-                    tmphMap[appname]=appsDetails
+                val appsDetails=AppsDetails(appName,pckg,activityName,icon)
+                    tmphMap[appName]=appsDetails
+               // println("name $appName")
             }
         tmphMap
         }

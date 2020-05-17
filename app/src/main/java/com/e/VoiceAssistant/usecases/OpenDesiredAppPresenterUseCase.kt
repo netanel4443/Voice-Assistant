@@ -2,11 +2,12 @@ package com.e.VoiceAssistant.usecases
 
 import android.content.ComponentName
 import android.content.Intent
+import com.e.VoiceAssistant.data.AppsDetails
 import com.e.VoiceAssistant.data.ComponentObject
 
 class OpenDesiredAppPresenterUseCase {
 
-    fun getDesiredIntent(appComponent:HashMap<String, ComponentObject>,
+    fun getDesiredIntent(appComponent:HashMap<String, AppsDetails>,
                          splitedResultsLhset:LinkedHashSet<String>  ): Intent {
 
             val resultss = HashSet<String>()
@@ -47,14 +48,14 @@ class OpenDesiredAppPresenterUseCase {
         return  navigateToDesiredApp(pckg,appComponent)
         }
 
-    private fun navigateToDesiredApp(pckg: String,appComponent:HashMap<String, ComponentObject>): Intent {
+    private fun navigateToDesiredApp(pckg: String,appComponent:HashMap<String, AppsDetails>): Intent {
       //    println("pckggg $pckg")
             var intent = Intent()
 
            // intent.component = appComponent[pckg]
 
            appComponent[pckg]?.run {
-               val component=ComponentName(this.activityName,this.pckg)
+               val component=ComponentName(this.activity,this.pckg)
                intent= Intent(Intent.ACTION_MAIN)
                intent.addCategory(Intent.CATEGORY_LAUNCHER)
                intent.component =component

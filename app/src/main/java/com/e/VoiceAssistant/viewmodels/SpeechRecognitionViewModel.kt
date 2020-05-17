@@ -27,7 +27,6 @@ class SpeechRecognitionViewModel @Inject constructor(
     private var appsDetailsHmap=HashMap<String,AppsDetails>()
     private var addedApps= LinkedHashMap<String,Drawable?>()
     private var state=MutableLiveData<SettingsViewModelStates>()
-    private var appsToDelete=ArrayList<String>()
     private var selectedApp=AppsDetails("","","",null)
     private var speechResultAppName=""
     private var talkBtnIcon=R.drawable.ic_mic_white_background_24
@@ -67,6 +66,7 @@ class SpeechRecognitionViewModel @Inject constructor(
         /* because we immediately set a new value in MainActivity to appToBeSaved.newName(although kotlin is by value , the object.newname points to same place in memory) ,
        the value changes that's why we need to cache it before it changes*/
         val tmpNewName=appToBeSaved.newName
+        val realName=appToBeSaved.realName
         +useCases.saveApp(appToBeSaved.newName,appToBeSaved.pckg,appToBeSaved.realName,appToBeSaved.activity)
             .subscribeOnIoAndObserveOnMain()
             .doOnSubscribe { showDialog(View.VISIBLE) }
@@ -76,7 +76,7 @@ class SpeechRecognitionViewModel @Inject constructor(
                     if (addedApps.isNotEmpty()){
                         addedApps[tmpNewName]=icon
                     }
-                    addItemToAppList(tmpNewName,appToBeSaved.activity,appToBeSaved.pckg,icon)
+                    addItemToAppList(tmpNewName,appToBeSaved.activity,appToBeSaved.pckg,icon,realName)
                 },
                 {/*   it.printStackTrace()*/ })
     }
@@ -97,37 +97,8 @@ class SpeechRecognitionViewModel @Inject constructor(
     private fun removeItemFromAppList(name:String){
         state.value=SettingsViewModelStates.RemoveItemFromAppList(name)
     }
-    private fun addItemToAppList( name:String, activityName:String, pckg:String, icon:Drawable?){
-        state.value=SettingsViewModelStates.AddItemToAppList(name,activityName,pckg,icon)
-    }
-
-    fun getListOrCachedApplist(){
-        if (addedApps.isEmpty()){
-            getAppsList()
-        }
-        else
-            getCachedAppList()
-    }
-
-    fun getCachedAppList():LiveData<LinkedHashMap<String, Drawable?>>{
-        return MutableLiveData(addedApps)
-    }
-
-    private fun getAppsList() {
-        +useCases.getAppsListFromDB()
-            .flatMap {
-                useCases.extractAddedAppsIconsFromAppList(it, appsDetailsHmap)
-            }
-            .subscribeOnIoAndObserveOnMain()
-            .doOnSubscribe { state.setValue(SettingsViewModelStates.ShowDialog(View.VISIBLE)) }
-            .subscribe({
-                println("${UUID.randomUUID()} number of times")
-                addedApps = it.first
-                appsToDelete = it.second
-                state.value = SettingsViewModelStates.PassAppsToFragment(it.first)
-                showDialog(View.INVISIBLE)
-            },
-            { showDialog(View.INVISIBLE) })
+    private fun addItemToAppList( name:String, activityName:String, pckg:String, icon:Drawable?,realName:String){
+        state.value=SettingsViewModelStates.AddItemToAppList(name,activityName,pckg,icon,realName)
     }
 
     fun initCachedSettingsActivityUI(){
@@ -140,7 +111,6 @@ class SpeechRecognitionViewModel @Inject constructor(
     }
 
     fun handleTalkOrStopClick() {
-       // state.value=SettingsViewModelStates.HandleClick(talkBtnIcon)
         clickSubject.onNext(SettingsViewModelStates.HandleClick(talkBtnIcon))
     }
 
@@ -157,5 +127,16 @@ class SpeechRecognitionViewModel @Inject constructor(
         if (talkBtnIcon==R.drawable.ic_pause_white_background_24){
             clickSubject.onNext(SettingsViewModelStates.HandleClick(talkBtnIcon))
         }
+    }
+
+    fun getStoredAppsDetails(hashMap: HashMap<String, AppsDetails>) {
+        +useCases.getAppsListFromDB()
+            .flatMap { useCases.addToSavedAppsProperIcon(it,hashMap) }
+            .subscribeOnIoAndObserveOnMain()
+            .subscribe({
+                state.value=SettingsViewModelStates.StoredAppsDetails(it)
+            },{
+              /*  it.printStackTrace()*/
+            })
     }
 }

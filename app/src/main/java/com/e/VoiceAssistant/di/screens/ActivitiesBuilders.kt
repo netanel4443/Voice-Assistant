@@ -24,6 +24,7 @@ abstract class ActivitiesBuilders {
     abstract fun contributeOnBoardingActivity():OnBoardingActivity
 
     @ActivityScope
-    @ContributesAndroidInjector
+    @ContributesAndroidInjector(modules = [
+        ViewModelsModule::class])
     abstract fun contributeWelcomeSplashScreen():WelcomeSplashActivity
 }

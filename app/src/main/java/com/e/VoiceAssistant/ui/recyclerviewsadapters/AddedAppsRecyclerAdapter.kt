@@ -9,10 +9,11 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.e.VoiceAssistant.R
+import com.e.VoiceAssistant.data.AppsDetails
 import kotlinx.android.synthetic.main.added_apps_recycler_design.view.*
 import kotlin.collections.LinkedHashMap
 
-class AddedAppsRecyclerAdapter(val list:LinkedHashMap<String, Drawable?>, val click:(String)->Unit):RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class AddedAppsRecyclerAdapter(val list:HashMap<String, AppsDetails>, val click:(String)->Unit):RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater= LayoutInflater.from(parent.context)
@@ -26,7 +27,7 @@ class AddedAppsRecyclerAdapter(val list:LinkedHashMap<String, Drawable?>, val cl
       if (holder is ViewHolder){
         val name=list.keys.elementAt(position)
         holder.appName.text=name
-        holder.appIcon.setImageDrawable(list.get(name)!!)
+        holder.appIcon.setImageDrawable(list.get(name)!!.icon)
       //    printMessage(UUID.randomUUID().toString(),list.get(name)==null)
       }
     }

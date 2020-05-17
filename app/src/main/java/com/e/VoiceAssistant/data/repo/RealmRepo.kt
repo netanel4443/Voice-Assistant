@@ -87,7 +87,7 @@ class RealmRepo @Inject constructor(
             val realm=Realm.getInstance(config.config())
             realm.use {
             try {
-              //  println("deleted")
+              // println("deleted")
                 list.forEach {name->
                     realm.where(AddedApps::class.java)
                         .equalTo("newName",name)

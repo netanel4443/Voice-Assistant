@@ -3,6 +3,7 @@ package com.e.VoiceAssistant.ui.services.SpeechRecognizerService.notifications
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -47,6 +48,7 @@ class ForegroundNotification {
             val notificationManager = context.getSystemService(NotificationManager::class.java)
                 notificationManager?.createNotificationChannel(channel)
         }
-         NotificationManagerCompat.from(context).notify(1,builder.build())
+         (context as Service).startForeground(1,builder.build())
+       //  NotificationManagerCompat.from(context).notify(1,builder.build())
     }
 }

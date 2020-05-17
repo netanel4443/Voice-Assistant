@@ -10,7 +10,7 @@ interface SpeechRecognizerServicePresenterState {
                          trashParams: WindowManager.LayoutParams )
    fun handleClick(icon : Int)
    fun openSettingsActivity()
-   fun addAppsFromMemory(apps:HashMap<String, Pair<String,String>>)
    fun handleMenuClick(visibility: Int)
    fun changeTalkIcon(icon:Int)
+   fun secondListenToUser()
 }

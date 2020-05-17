@@ -55,8 +55,4 @@ class FloatingRepresentOperationsDialog(val context: Context) {
         recyclerView.layoutManager=LinearLayoutManager(context,RecyclerView.HORIZONTAL,false)
         recyclerView.setHasFixedSize(true)
     }
-
-//    private fun recycleTypedArray() {
-//        images.recycle()
-//    }
 }

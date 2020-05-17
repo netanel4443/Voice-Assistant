@@ -12,17 +12,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.e.VoiceAssistant.R
 import com.e.VoiceAssistant.data.AppsDetails
 import com.e.VoiceAssistant.data.SavedAppsDetails
-import com.e.VoiceAssistant.permissions.SpeechRecognitionPermission
+import com.e.VoiceAssistant.permissions.RequestGlobalPermission
 import com.e.VoiceAssistant.sensors.AddAppSpeechRecognitionHelper
-import com.e.VoiceAssistant.ui.services.SpeechRecognizerService.SpeechRecognizerService
 import com.e.VoiceAssistant.ui.fragments.AddedAppsFragment
 import com.e.VoiceAssistant.ui.dialogs.CircleProgressBarDialog
 import com.e.VoiceAssistant.ui.recyclerviewsadapters.AppsDetailsRecyclerViewAdapter
-import com.e.VoiceAssistant.data.DeviceAppsDetails
 import com.e.VoiceAssistant.permissions.RequestCodes
 import com.e.VoiceAssistant.permissions.StartActivityToCheckPermission
 import com.e.VoiceAssistant.sensors.SpeechStates
 import com.e.VoiceAssistant.ui.ads.Adrequest
+import com.e.VoiceAssistant.userscollectreddata.AppsDetailsSingleton
 import com.e.VoiceAssistant.utils.*
 import com.e.VoiceAssistant.utils.rxJavaUtils.subscribeOnIoAndObserveOnMain
 import com.e.VoiceAssistant.utils.rxJavaUtils.throttle
@@ -30,10 +29,11 @@ import com.e.VoiceAssistant.viewmodels.SpeechRecognitionViewModel
 import com.e.VoiceAssistant.viewmodels.states.SettingsViewModelStates
 import com.jakewharton.rxbinding.view.RxView
 import kotlinx.android.synthetic.main.activity_main.*
-import java.lang.Exception
+import javax.inject.Inject
 
 class MainActivity : BaseActivity() {
 
+    @Inject lateinit var appsDetailsSingleton:AppsDetailsSingleton
     private val TAG="MainActivity"
     private lateinit var selectedApp: SavedAppsDetails
     private var selectedIcon:Drawable?=null
@@ -48,13 +48,14 @@ class MainActivity : BaseActivity() {
         setContentView(R.layout.activity_main)
 
         supportActionBar?.hide()
+
         initAds()
         selectedApp= SavedAppsDetails("", "", "", "")
         selectedIcon=getDrawable(R.drawable.ic_launcher_background)
         progressBar = CircleProgressBarDialog(this)
 
         viewModel.getState().observe(this, Observer{state->
-            when(state){
+            when(state){ 
                 is SettingsViewModelStates.GetAppsDetails->initUI(state.list)
                 is SettingsViewModelStates.ShowDialog->showOrHideProgressBar(state.visibility)
                 is SettingsViewModelStates.SpeechResult->{
@@ -63,7 +64,7 @@ class MainActivity : BaseActivity() {
                 }
                 is SettingsViewModelStates.ApplySelectedApp->SetSelectedApp(state.appsDetails)
                 is SettingsViewModelStates.GetCachedData->setCachedSettings(state.appDetailsHmap,state.selectedApp,state.speechResultAppName)
-                is SettingsViewModelStates.AddItemToAppList-> addItemToServiceAppList(state.name,state.activityName,state.pckg)
+                is SettingsViewModelStates.AddItemToAppList-> addItemToServiceAppList(state.name,state.activityName,state.pckg,state.icon,state.realName)
                 is SettingsViewModelStates.RemoveItemFromAppList->removeItemfromServiceAppList(state.name)
                 is SettingsViewModelStates.ChangeTalkBtnIcon->changeTalkIcon(state.icon)
                 is SettingsViewModelStates.HandleClick-> handleClick(state.icon)
@@ -78,7 +79,7 @@ class MainActivity : BaseActivity() {
         }
 
         +RxView.clicks(startTalkSettingsActivity).observeOn(rx.android.schedulers.AndroidSchedulers.mainThread())
-            .filter { SpeechRecognitionPermission.
+            .filter { RequestGlobalPermission.
               check(this, permission.RECORD_AUDIO,RequestCodes.RECORD_AUDIO)
             }
             .subscribe {
@@ -127,24 +128,15 @@ class MainActivity : BaseActivity() {
         startTalkSettingsActivity.setBackgroundResource(icon)
     }
 
-    private fun addItemToServiceAppList(name:String,activityName:String,pckg:String) {
-        val intent=Intent(this,
-            SpeechRecognizerService::class.java)
-            intent.putExtra("state","ADD")
-            intent.putExtra("activityName",activityName)
-            intent.putExtra("package",pckg)
-            intent.putExtra("name",name)
-
-            startService(intent)
+    private fun addItemToServiceAppList(newName:String, activityName:String, pckg:String, icon:Drawable?, realName:String) {
+        val appsDetails=AppsDetails(realName,pckg,activityName,icon)
+        appsDetailsSingleton.storedAppsDetailsFromDB[newName]=appsDetails
+        appsDetailsSingleton.appsAndStoredAppsDetails[newName]=appsDetails
     }
 
     private fun removeItemfromServiceAppList(name:String){
-        val intent=Intent(this,
-            SpeechRecognizerService::class.java)
-            intent.putExtra("state","REMOVE")
-            intent.putExtra("name",name)
-
-            startService(intent)
+        appsDetailsSingleton.storedAppsDetailsFromDB.remove(name)
+        appsDetailsSingleton.appsAndStoredAppsDetails.remove(name)
     }
 
     private fun setCachedSettings(
@@ -173,13 +165,7 @@ class MainActivity : BaseActivity() {
     }
 
     private fun initAppsDetails() {
-        +DeviceAppsDetails().getAppsDetails(this)
-            .subscribeOnIoAndObserveOnMain()
-            .doOnSubscribe{viewModel.showDialog(View.VISIBLE)}
-            .subscribe(
-                {viewModel.initSettingsActivityUI(it)},
-                {//it.printStackTrace()
-                 viewModel.showDialog(View.INVISIBLE)})
+        viewModel.initSettingsActivityUI(appsDetailsSingleton.appsDetailsHmap)
     }
 
     private fun initUI(list:HashMap<String, AppsDetails>){

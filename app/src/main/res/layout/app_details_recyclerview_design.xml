@@ -31,6 +31,7 @@
             android:textSize="15sp"
             android:textColor="#000"
             android:textAlignment="center"
+            android:fontFamily="@font/davidlibre"
             app:layout_constraintLeft_toRightOf="@+id/appIcon"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"

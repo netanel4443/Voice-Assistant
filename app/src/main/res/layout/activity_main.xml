@@ -83,6 +83,7 @@
         android:layout_height="40dp"
         android:id="@+id/addBtnSettingsActivity"
         android:text="@string/add_app"
+        android:fontFamily="@font/davidlibre"
         android:textAlignment="center"
         android:textAllCaps="false"
         android:textColor="#ffff"

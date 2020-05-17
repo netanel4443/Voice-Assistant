@@ -6,6 +6,8 @@ import android.provider.ContactsContract
 import com.e.VoiceAssistant.permissions.CheckOnlyPerrmission
 import com.e.VoiceAssistant.utils.printMessage
 import io.reactivex.Observable
+import java.util.*
+import kotlin.collections.HashMap
 
 class ContactList {
 
@@ -18,7 +20,9 @@ class ContactList {
                  contactsList(context)//if permission granted , get contact list
              }
             else
-                 HashMap<String,String>()//if not granted return an empty hashMap object
+             {//if not granted return an empty hashMap object
+                 HashMap<String,String>()
+             }
         }
     }
     private fun contactsList(context: Context):HashMap<String,String>{
@@ -41,10 +45,12 @@ class ContactList {
                 var number :String
 
                 while (cursor.moveToNext()) {
-                    name = cursor.getString(nameIndex)
+                    name = cursor.getString(nameIndex).toLowerCase()
                     number = cursor.getString(numberIndex)
+                    name=name.replace("[^a-zא-ת ]".toRegex(),"")
+                    number=number.replace("[^0-9+]".toRegex(),"")
                     hMap[name]=number
-                   // printMessage(" $name"," $number")
+                 //   println("$name $number")
                 }
             }catch (e:Exception){}
             finally { cursor.close()}

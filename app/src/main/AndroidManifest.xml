@@ -5,12 +5,11 @@
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
 
-
     <application
-        android:name="com.e.VoiceAssistant.di.BaseApplication"
+        android:name=".di.BaseApplication"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="Voice Assistant"
@@ -18,30 +17,30 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name="com.e.VoiceAssistant.ui.splashScreen.WelcomeSplashActivity"
-                  android:theme="@style/Theme.AppCompat.Transparent.NoActionBar"  >
-
+        <activity android:name=".ui.activities.TalkAndResultsActivity"></activity>
+        <activity
+            android:name=".ui.splashScreen.WelcomeSplashActivity"
+            android:theme="@style/Theme.AppCompat.Transparent.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name="com.e.VoiceAssistant.ui.activities.MainActivity"/>
-
-        <activity android:name="com.e.VoiceAssistant.ui.activities.PermissionsActivity"
-                  android:theme="@style/Theme.AppCompat.Transparent.NoActionBar"/>
-
-        <activity android:name="com.e.VoiceAssistant.ui.splashScreen.LoadingSplashScreen"
-                  android:theme="@style/Theme.AppCompat.Transparent.NoActionBar"  />
-
+        <activity android:name=".ui.activities.MainActivity" />
+        <activity
+            android:name=".ui.activities.PermissionsActivity"
+            android:theme="@style/Theme.AppCompat.Transparent.NoActionBar" />
+        <activity
+            android:name=".ui.splashScreen.LoadingSplashScreen"
+            android:theme="@style/Theme.AppCompat.Transparent.NoActionBar" />
         <activity android:name=".ui.onboarding.OnBoardingActivity" />
 
-        <service android:name="com.e.VoiceAssistant.ui.services.SpeechRecognizerService.SpeechRecognizerService"
-            android:exported="false"
-            android:enabled="true">
-        </service>
+        <service
+            android:name=".ui.services.SpeechRecognizerService.SpeechRecognizerService"
+            android:enabled="true"
+            android:exported="false"></service>
+
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-8194360858461012~8844399517" />

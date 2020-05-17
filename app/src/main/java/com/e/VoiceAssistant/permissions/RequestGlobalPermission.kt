@@ -1,13 +1,12 @@
 package com.e.VoiceAssistant.permissions
 
-import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
-object SpeechRecognitionPermission {
+object RequestGlobalPermission {
 
     fun check(context: Context,permission:String,requestCode:Int):Boolean {
         if (ContextCompat.checkSelfPermission(
