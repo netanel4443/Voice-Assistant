@@ -5,7 +5,7 @@ import android.content.Intent
 import io.reactivex.Single
 import kotlin.collections.HashMap
 
-class DeviceAppsDetails(){
+class DeviceAppsDetails{
     fun getAppsDetails(context: Context):Single<HashMap<String,AppsDetails>>{
 
     return  Single.fromCallable {

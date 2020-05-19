@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.e.VoiceAssistant.R
 import com.e.VoiceAssistant.data.AppsDetails
-import com.e.VoiceAssistant.ui.recyclerviewsadapters.AddedAppsRecyclerAdapter
+import com.e.VoiceAssistant.ui.recyclerviews.recyclerviewsadapters.AddedAppsRecyclerAdapter
 import com.e.VoiceAssistant.userscollectreddata.AppsDetailsSingleton
 import com.e.VoiceAssistant.viewmodels.SpeechRecognitionViewModel
 import com.e.VoiceAssistant.viewmodels.states.SettingsViewModelStates

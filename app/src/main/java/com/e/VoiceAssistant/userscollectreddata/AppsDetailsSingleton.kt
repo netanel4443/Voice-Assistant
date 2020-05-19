@@ -1,6 +1,5 @@
 package com.e.VoiceAssistant.userscollectreddata
 
-import android.graphics.drawable.Drawable
 import com.e.VoiceAssistant.data.AppsDetails
 import com.e.VoiceAssistant.di.annotations.AppScope
 import javax.inject.Inject
@@ -11,3 +10,4 @@ class AppsDetailsSingleton @Inject constructor() {
     val storedAppsDetailsFromDB=HashMap<String,AppsDetails>()
     val appsAndStoredAppsDetails=HashMap<String,AppsDetails>()
 }
+

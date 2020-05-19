@@ -1,6 +1,5 @@
-package com.e.VoiceAssistant.ui.recyclerviewsadapters
+package com.e.VoiceAssistant.ui.recyclerviews.recyclerviewsadapters
 
-import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.e.VoiceAssistant.R
 import com.e.VoiceAssistant.data.AppsDetails
 import kotlinx.android.synthetic.main.added_apps_recycler_design.view.*
-import kotlin.collections.LinkedHashMap
 
 class AddedAppsRecyclerAdapter(val list:HashMap<String, AppsDetails>, val click:(String)->Unit):RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 

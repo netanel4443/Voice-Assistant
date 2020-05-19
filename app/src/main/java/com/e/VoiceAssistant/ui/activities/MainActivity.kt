@@ -16,7 +16,7 @@ import com.e.VoiceAssistant.permissions.RequestGlobalPermission
 import com.e.VoiceAssistant.sensors.AddAppSpeechRecognitionHelper
 import com.e.VoiceAssistant.ui.fragments.AddedAppsFragment
 import com.e.VoiceAssistant.ui.dialogs.CircleProgressBarDialog
-import com.e.VoiceAssistant.ui.recyclerviewsadapters.AppsDetailsRecyclerViewAdapter
+import com.e.VoiceAssistant.ui.recyclerviews.recyclerviewsadapters.AppsDetailsRecyclerViewAdapter
 import com.e.VoiceAssistant.permissions.RequestCodes
 import com.e.VoiceAssistant.permissions.StartActivityToCheckPermission
 import com.e.VoiceAssistant.sensors.SpeechStates

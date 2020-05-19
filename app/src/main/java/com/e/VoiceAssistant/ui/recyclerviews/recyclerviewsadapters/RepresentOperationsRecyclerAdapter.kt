@@ -1,15 +1,12 @@
-package com.e.VoiceAssistant.ui.recyclerviewsadapters
+package com.e.VoiceAssistant.ui.recyclerviews.recyclerviewsadapters
 
 import android.content.res.TypedArray
-import android.graphics.drawable.Drawable
-import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.e.VoiceAssistant.R
 import kotlinx.android.synthetic.main.represent_operations_recycler_design.view.*
-import kotlin.collections.HashMap
 
 class RepresentOperationsRecyclerAdapter(
             val images:TypedArray,

@@ -10,7 +10,7 @@ import android.view.WindowManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.e.VoiceAssistant.R
-import com.e.VoiceAssistant.ui.recyclerviewsadapters.RepresentOperationsRecyclerAdapter
+import com.e.VoiceAssistant.ui.recyclerviews.recyclerviewsadapters.RepresentOperationsRecyclerAdapter
 import kotlinx.android.synthetic.main.recyclerview_layout.view.*
 
 class FloatingRepresentOperationsDialog(val context: Context) {

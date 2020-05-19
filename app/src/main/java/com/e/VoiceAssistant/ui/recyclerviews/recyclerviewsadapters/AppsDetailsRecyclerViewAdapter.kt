@@ -1,4 +1,4 @@
-package com.e.VoiceAssistant.ui.recyclerviewsadapters
+package com.e.VoiceAssistant.ui.recyclerviews.recyclerviewsadapters
 
 import android.view.LayoutInflater
 import android.view.View

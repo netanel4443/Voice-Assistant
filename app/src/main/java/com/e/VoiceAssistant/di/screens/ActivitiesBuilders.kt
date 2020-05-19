@@ -4,6 +4,7 @@ import com.e.VoiceAssistant.ui.activities.MainActivity
 import com.e.VoiceAssistant.di.annotations.ActivityScope
 import com.e.VoiceAssistant.di.viewmodels.OnBoardingViewModelModule
 import com.e.VoiceAssistant.di.viewmodels.ViewModelsModule
+import com.e.VoiceAssistant.ui.activities.TalkAndResultsActivity
 import com.e.VoiceAssistant.ui.onboarding.OnBoardingActivity
 import com.e.VoiceAssistant.ui.splashScreen.WelcomeSplashActivity
 import dagger.Module
@@ -27,4 +28,8 @@ abstract class ActivitiesBuilders {
     @ContributesAndroidInjector(modules = [
         ViewModelsModule::class])
     abstract fun contributeWelcomeSplashScreen():WelcomeSplashActivity
+
+    @ActivityScope
+    @ContributesAndroidInjector
+    abstract fun contributeTalkAndResultsActivity(): TalkAndResultsActivity
 }

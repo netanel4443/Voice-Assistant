@@ -4,11 +4,12 @@ import android.content.ComponentName
 import android.content.Intent
 import com.e.VoiceAssistant.data.AppsDetails
 import com.e.VoiceAssistant.data.ComponentObject
+import io.reactivex.Observable
 
 class OpenDesiredAppPresenterUseCase {
 
     fun getDesiredIntent(appComponent:HashMap<String, AppsDetails>,
-                         splitedResultsLhset:LinkedHashSet<String>  ): Intent {
+                         splitedResultsLhset:LinkedHashSet<String>  ): Observable<Intent> {
 
             val resultss = HashSet<String>()
             var pckg=""
@@ -40,27 +41,26 @@ class OpenDesiredAppPresenterUseCase {
             resultss.forEach {
                 //    println("results $it")
                 if (appComponent.containsKey(it)) {
-//                    action(SpeechStates.Success,it)
                     pckg=it
                     return@forEach
                 }
             }
-        return  navigateToDesiredApp(pckg,appComponent)
-        }
+
+            val intent=navigateToDesiredApp(pckg,appComponent)
+            return  Observable.just(intent)
+    }
 
     private fun navigateToDesiredApp(pckg: String,appComponent:HashMap<String, AppsDetails>): Intent {
       //    println("pckggg $pckg")
             var intent = Intent()
 
-           // intent.component = appComponent[pckg]
-
-           appComponent[pckg]?.run {
+            appComponent[pckg]?.run {
                val component=ComponentName(this.activity,this.pckg)
                intent= Intent(Intent.ACTION_MAIN)
                intent.addCategory(Intent.CATEGORY_LAUNCHER)
                intent.component =component
                intent
-             }
+            }
 
         return intent
     }

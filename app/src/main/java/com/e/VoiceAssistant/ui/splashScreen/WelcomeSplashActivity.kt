@@ -70,15 +70,15 @@ class WelcomeSplashActivity : BaseActivity() {
    }
 
     private fun initAppsDetails() {
+
         +DeviceAppsDetails().getAppsDetails(this)
             .subscribeOnIoAndObserveOnMain()
-            .subscribe({
+            .subscribe(
+                {
                     appsDetailsSingleton.appsDetailsHmap.putAll(it)
                     appsDetailsSingleton.appsAndStoredAppsDetails.putAll(it)
                     viewModel.getStoredAppsDetails(it)
-                },
-                {  // it.printStackTrace()
-                })
+                }, {   it.printStackTrace() })
     }
 
 
