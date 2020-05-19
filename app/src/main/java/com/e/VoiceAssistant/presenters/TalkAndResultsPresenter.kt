@@ -2,17 +2,14 @@ package com.e.VoiceAssistant.presenters
 
 import android.content.Intent
 import android.net.Uri
-import android.view.Gravity
-import android.view.View
 import com.e.VoiceAssistant.R
 import com.e.VoiceAssistant.data.AppsDetails
 import com.e.VoiceAssistant.di.annotations.ActivityScope
-import com.e.VoiceAssistant.presenters.presentersStates.SpeechRecognizerServicePresenterState
 import com.e.VoiceAssistant.presenters.presentersStates.TalkAndResultsPresenterView
 import com.e.VoiceAssistant.ui.recyclerviews.datahelpers.PossibleMatches
 import com.e.VoiceAssistant.ui.recyclerviews.datahelpers.ResultsData
 import com.e.VoiceAssistant.usecases.OpenDesiredAppPresenterUseCase
-import com.e.VoiceAssistant.usecases.PresenterUseCases
+import com.e.VoiceAssistant.usecases.TalkAndResultUseCases
 import com.e.VoiceAssistant.utils.rxJavaUtils.subscribeOnIoAndObserveOnMain
 import com.e.VoiceAssistant.utils.rxJavaUtils.throttle
 import io.reactivex.Single
@@ -23,8 +20,8 @@ import io.reactivex.subjects.PublishSubject
 import javax.inject.Inject
 
 @ActivityScope
-class SpeechReconizerTalkAndResultsPresenter@Inject constructor(
-    private val useCases:PresenterUseCases){
+class TalkAndResultsPresenter@Inject constructor(
+    private val useCases:TalkAndResultUseCases){
     private val compositeDisposable=CompositeDisposable()
     private var talkBtnIcon=R.drawable.ic_mic_white_background_24
     private val clickSubject= PublishSubject.create<Int>()
@@ -125,14 +122,14 @@ class SpeechReconizerTalkAndResultsPresenter@Inject constructor(
     }
 
     private fun requiredOperationIsSearchInYoutube(matches: ArrayList<String>,requiredOpration: String){
-        +useCases.searchInYoutube(matches[0],requiredOpration)
+        +useCases.searchInYoutube(matches,requiredOpration)
             .subscribeOnIoAndObserveOnMain()
-            .subscribe({intent->view.navigateToDesiredApp(intent,HashSet(),1)},{})
+            .subscribe({ view.navigateToDesiredApp(it.first,it.second as HashSet<ResultsData>,1)},{})
     }
     private fun requiredOperationIsSearchInSpotify(appComponent: HashMap<String, AppsDetails>, matches: ArrayList<String>, requiredOpration: String){
-        +useCases.searchInSpotify(appComponent, matches[0],requiredOpration)
+        +useCases.searchInSpotify(appComponent, matches,requiredOpration)
             .subscribeOnIoAndObserveOnMain()
-            .subscribe({intent->view.navigateToDesiredApp(intent,HashSet(),1)},{})
+            .subscribe({ view.navigateToDesiredApp(it.first,it.second as HashSet<ResultsData>,1)},{})
     }
     private fun requiredOperationIsSearchInWeb(matches: ArrayList<String>, requiredOpration: String){
         val hashSet= hashSetOf<PossibleMatches>() as HashSet<ResultsData>
@@ -140,9 +137,9 @@ class SpeechReconizerTalkAndResultsPresenter@Inject constructor(
                 val key=PossibleMatches(it)
                 hashSet.add(key)
             }
-        +useCases.searchInWeb(matches[0],requiredOpration)
+        +useCases.searchInWeb(matches,requiredOpration)
             .subscribeOnIoAndObserveOnMain()
-            .subscribe({intent->view.navigateToDesiredApp(intent,hashSet,1)},{})
+            .subscribe({ view.navigateToDesiredApp(it.first,it.second as HashSet<ResultsData>,1)},{})
     }
     private fun requiredOperationIsNavigate(requiredOpration: String,matches: ArrayList<String>){
         +useCases.navigateTo(requiredOpration, matches[0])

@@ -3,12 +3,10 @@ package com.e.VoiceAssistant.usecases
 import android.app.SearchManager
 import android.content.ComponentName
 import android.content.Intent
-import android.graphics.PixelFormat
 import android.net.Uri
-import android.os.Build
 import android.provider.MediaStore
-import android.view.WindowManager
 import com.e.VoiceAssistant.data.AppsDetails
+import com.e.VoiceAssistant.di.annotations.ActivityScope
 import com.e.VoiceAssistant.ui.recyclerviews.datahelpers.ContactsData
 import com.e.VoiceAssistant.ui.recyclerviews.datahelpers.PossibleMatches
 import com.e.VoiceAssistant.ui.recyclerviews.datahelpers.ResultsData
@@ -17,45 +15,16 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import java.util.*
 import javax.inject.Inject
-import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 import kotlin.collections.LinkedHashSet
 
-//@ServiceScope
-//todo add scope
-class PresenterUseCases @Inject constructor() {
+@ActivityScope
+class TalkAndResultUseCases @Inject constructor() {
     private val requiredOperationsHset=
         hashSetOf("הודעה","text","וואטסאפ","whatsapp",
             "נווט","navigate","youtube","יוטיוב","ספוטיפיי","spotify",
             "call","התקשר","תקשר","תתקשר","search", "פתח","אופן","open","חפש")
-//todo fix send sms/whatsapp bug , sends sms  even if I canceled the second record
-    fun windowManagerAttributes():WindowManager.LayoutParams{
-        val layoutFlag: Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-        }
-        else WindowManager.LayoutParams.TYPE_PHONE
-        return WindowManager.LayoutParams(
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            layoutFlag,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-            PixelFormat.TRANSLUCENT
-        )
-    }
-    fun windowManagerFullScreenAttributes():WindowManager.LayoutParams{
-        val layoutFlag: Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-        }
-        else WindowManager.LayoutParams.TYPE_PHONE
-
-        return WindowManager.LayoutParams(
-            WindowManager.LayoutParams.MATCH_PARENT,
-            WindowManager.LayoutParams.MATCH_PARENT,
-            layoutFlag,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-            PixelFormat.TRANSLUCENT
-        )
-    }
+    //todo fix send sms/whatsapp bug , sends sms  even if I canceled the second record
 
     fun initRecognizerIntent():Single<Intent> {
         return  RecognizerIntentInit().init()
@@ -69,44 +38,44 @@ class PresenterUseCases @Inject constructor() {
 
         return Single.fromCallable {
             matches.forEach {
-            val st = StringTokenizer(it, " ")
+                val st = StringTokenizer(it, " ")
 
-            while (st.hasMoreTokens()) {//todo check the locality if works properly on en-US
-                val nextToken = st.nextToken().toLowerCase(Locale.getDefault())
+                while (st.hasMoreTokens()) {//todo check the locality if works properly on en-US
+                    val nextToken = st.nextToken().toLowerCase(Locale.getDefault())
 
-                if (requiredOperation.isEmpty() && requiredOperationsHset.contains(nextToken)) {
-                    requiredOperation = nextToken
-                }
+                    if (requiredOperation.isEmpty() && requiredOperationsHset.contains(nextToken)) {
+                        requiredOperation = nextToken
+                    }
                     splitedResultsLhset.add(nextToken)
                 }
             }
             Pair(requiredOperation,splitedResultsLhset)
         }
-         .filter{requiredOperation.isNotEmpty()}.toObservable()
+            .filter{requiredOperation.isNotEmpty()}.toObservable()
     }
 
     fun sendSms(matches:ArrayList<String>, requiredOperation: String, contactList: HashMap<String, String>):Observable<Pair<Intent,HashSet<ContactsData>>>{
         val namesAndNumbers=HashSet<ContactsData>()
         return findContact(matches,contactList,requiredOperation)
-           .map { contacts->
-               namesAndNumbers.addAll(contacts)
-               contacts.first().number
-           }
-           .map {contactNumber->
+            .map { contacts->
+                namesAndNumbers.addAll(contacts)
+                contacts.first().number
+            }
+            .map {contactNumber->
                 val intent=sendSmsIntent(contactNumber)
-                 Pair(intent,namesAndNumbers)
-           }
+                Pair(intent,namesAndNumbers)
+            }
     }
 
-    fun sendSmsIntent(contactNumber: String):Intent{
-      return Intent(Intent.ACTION_SENDTO).apply {
-          data = Uri.parse("smsto:$contactNumber")
-      }
+    private fun sendSmsIntent(contactNumber: String):Intent{
+        return Intent(Intent.ACTION_SENDTO).apply {
+            data = Uri.parse("smsto:$contactNumber")
+        }
     }
 
     fun sendWhatsApp(matches:ArrayList<String>, requiredOperation: String, contactList: HashMap<String, String>):Observable<Pair<Intent,HashSet<ContactsData>>>{
         val namesAndNumbers=HashSet<ContactsData>()
-        println("whatsapp 1")
+
         return findContact(matches,contactList,requiredOperation)
             .map { contacts->
                 namesAndNumbers.addAll(contacts)
@@ -119,7 +88,6 @@ class PresenterUseCases @Inject constructor() {
     }
 
     private fun sendWhatsAppIntent(contactNumber: String):Intent{
-        println("whatsapp 2")
         val uri =  Uri.parse(
             String.format("https://api.whatsapp.com/send?phone=%s", contactNumber)
         )
@@ -134,45 +102,48 @@ class PresenterUseCases @Inject constructor() {
     }
 
 
-
     fun callTo(matches:ArrayList<String>, requiredOperation: String, contactList: HashMap<String, String>):Observable<Pair<Intent,HashSet<ContactsData>>>{
-         val namesAndNumbers=HashSet<ContactsData>()
+        val namesAndNumbers=HashSet<ContactsData>()
 
-     return findContact(matches,contactList,requiredOperation)
-             .map { contacts->
-                 println("here at first map?")
-                     namesAndNumbers.addAll(contacts)
-                     contacts.first().number
-             }
-             .map {contactNumber->
-                 val intent=callToIntent(contactNumber)
-                 Pair(intent,namesAndNumbers)
-             }
-     }
-
-     fun callToIntent(contactNumber: String):Intent{
-         return Intent(Intent.ACTION_DIAL).apply {
-             data = Uri.parse("tel:$contactNumber")
-         }
-     }
-
-     fun searchInWeb(query: String,requiredOperation: String):Observable<Intent>{
-        val finalQuery=getFinalQuery(query,requiredOperation)
-        return Observable.just(searchInWebIntent(finalQuery))
+        return findContact(matches,contactList,requiredOperation)
+            .map { contacts->
+                println("here at first map?")
+                namesAndNumbers.addAll(contacts)
+                contacts.first().number
+            }
+            .map {contactNumber->
+                val intent=callToIntent(contactNumber)
+                Pair(intent,namesAndNumbers)
+            }
     }
 
-    fun searchInWebIntent(query: String):Intent{
-        return  Intent(Intent.ACTION_WEB_SEARCH).apply {
-                 putExtra(SearchManager.QUERY, query)
+    private fun callToIntent(contactNumber: String):Intent{
+        return Intent(Intent.ACTION_DIAL).apply {
+            data = Uri.parse("tel:$contactNumber")
         }
     }
 
-    fun searchInSpotify( appComponent: HashMap<String, AppsDetails>,query: String,requiredOperation: String):Observable<Intent>{
-       val finalQuery=getFinalQuery(query,requiredOperation)
-       return Observable.just(searchInSpotifyIntent(finalQuery,appComponent))
+    fun searchInWeb(matches:ArrayList<String>, requiredOperation: String):Observable<Pair<Intent,HashSet<PossibleMatches>>>{
+        val possibleMatches=getPossibleMatchesWithout(matches,requiredOperation)
+        val finalQuery=possibleMatches.first()
+        val intent=searchInWebIntent(finalQuery.match)
+        return Observable.just(Pair(intent,possibleMatches))
     }
 
-    fun searchInSpotifyIntent(query: String,appComponent: HashMap<String, AppsDetails>):Intent{
+    private fun searchInWebIntent(query: String):Intent{
+        return  Intent(Intent.ACTION_WEB_SEARCH).apply {
+            putExtra(SearchManager.QUERY, query)
+        }
+    }
+
+    fun searchInSpotify(appComponent: HashMap<String, AppsDetails>, matches: ArrayList<String>, requiredOperation: String):Observable<Pair<Intent,HashSet<PossibleMatches>>>{
+        val possibleMatches=getPossibleMatchesWithout(matches,requiredOperation)
+        val finalQuery=possibleMatches.first()
+        val intent=searchInSpotifyIntent(finalQuery.match,appComponent)
+        return Observable.just(Pair(intent,possibleMatches))
+    }
+
+    private fun searchInSpotifyIntent(query: String,appComponent: HashMap<String, AppsDetails>):Intent{
         return appComponent["spotify"]?.run {
             val intent = Intent(Intent.ACTION_MAIN)
             intent.action = MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH
@@ -188,46 +159,57 @@ class PresenterUseCases @Inject constructor() {
         }
     }
 
-     fun searchInYoutube(query:String,requiredOperation: String):Observable<Intent>{
-        val finalQuery= getFinalQuery(query,requiredOperation)
-        return Observable.just(searchInYoutubeIntent(finalQuery))
-     }
+    fun searchInYoutube(matches: ArrayList<String>, requiredOperation: String):Observable<Pair<Intent,HashSet<PossibleMatches>>>{
+        val possibleMatches=getPossibleMatchesWithout(matches,requiredOperation)
+        val finalQuery=possibleMatches.first()
+        val intent=searchInYoutubeIntent(finalQuery.match)
+        return Observable.just(Pair(intent,possibleMatches))
+    }
 
-     fun searchInYoutubeIntent(query:String):Intent{
-         return Intent(Intent.ACTION_SEARCH).apply {
-             setPackage("com.google.android.youtube")
-             putExtra(SearchManager.QUERY, query)
-             flags = Intent.FLAG_ACTIVITY_NEW_TASK
-         }
-     }
+    private fun searchInYoutubeIntent(query:String):Intent{
+        return Intent(Intent.ACTION_SEARCH).apply {
+            setPackage("com.google.android.youtube")
+            putExtra(SearchManager.QUERY, query)
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+    }
 
-     fun navigateTo(requiredOperation: String,location:String):Observable<Intent> {
-         val finalLocation=removeUnwantedPrefixFromResult(requiredOperation,location)
-         return Observable.just(navigateToIntent(finalLocation))
-     }
+    fun navigateTo(requiredOperation: String,location:String):Observable<Intent> {
+        val finalLocation=removeUnwantedPrefixFromResult(requiredOperation,location)
+        return Observable.just(navigateToIntent(finalLocation))
+    }
 
-     fun navigateToIntent(location:String):Intent{
+    private fun navigateToIntent(location:String):Intent{
         val url="https://waze.com/ul?q=$location"
         return  Intent(Intent.ACTION_VIEW).apply { data=Uri.parse(url) }
-     }
+    }
+
+    private fun getPossibleMatchesWithout(matches:ArrayList<String>,requiredOperation: String):HashSet<PossibleMatches>{
+        val possibleMatches=HashSet<PossibleMatches>()
+        matches.forEach { match->
+            getFinalQuery(match,requiredOperation).let {
+                possibleMatches.add(PossibleMatches(it))
+            }
+        }
+        return possibleMatches
+    }
 
     /** this function deletes the keyword in order to get pure string the use wants to search.
      * In addition it deletes all previous words before desired keyword
-     * @param query if query string doesn't contain
-     * @param requiredOperation then,
-     * @return empty string
-     * and don't execute if's block because index of will return -1 and error will occur */
+     *  if [query] string doesn't contain [requiredOperation] then,
+     * [return] an empty string and don't execute if's block,
+     * because [indexOf] will return -1 and error will occur */
     private fun getFinalQuery(query: String,requiredOperation: String):String{
 
-          return if (query.contains(requiredOperation))
-                   {
-                      query.substring(query.indexOf(requiredOperation,0))
-                          .run { replace(requiredOperation,"")
-                              .removeSuffix(" ")
-                              .removePrefix(" ")
-                          }
-                   }
-                 else { "" }
+        return if (query.contains(requiredOperation))
+        {
+            query.substring(query.indexOf(requiredOperation,0))
+                .run { replace(requiredOperation,"")
+                    .removeSuffix(" ")
+                    .removePrefix(" ")
+                }
+        }
+        else { "" }
     }
 
     private fun removeUnwantedPrefixFromResult(requiredOperation: String, result:String):String{
@@ -261,7 +243,6 @@ class PresenterUseCases @Inject constructor() {
                 val contactName=removeUnwantedPrefixFromResult(requiredOperation,stringToSearch)
                 if (contactList.containsKey(contactName)){
                     tmpNameAndNumberHmap.add(ContactsData(contactName,contactList[contactName].toString()))
-                    //tmpNameAndNumberHmap[contactName]=contactList[contactName].toString()
                 }
                 else if (contactName.isNotEmpty())
                 {
@@ -269,7 +250,6 @@ class PresenterUseCases @Inject constructor() {
                         if (key.contains(contactName)){
                             val number=contactList[key]
                             println("possible $key $number")
-                          //  tmpNameAndNumberHmap[key]=number.toString()
                             tmpNameAndNumberHmap.add(ContactsData(key,number.toString()))
                         }
                     }
@@ -284,12 +264,12 @@ class PresenterUseCases @Inject constructor() {
     fun changeSelectedResult(requiredOperation:String,
                              resultData: ResultsData,appComponent: HashMap<String, AppsDetails>,
                              message: String ):Observable<Intent>{
-       val intent= when (requiredOperation) {
+        val intent= when (requiredOperation) {
             "התקשר", "תתקשר", "תקשר", "call" -> {
-              callToIntent((resultData as ContactsData).number)
+                callToIntent((resultData as ContactsData).number)
             }
             "spotify", "ספוטיפיי" -> {
-               searchInSpotifyIntent((resultData as PossibleMatches).match,appComponent)
+                searchInSpotifyIntent((resultData as PossibleMatches).match,appComponent)
             }
             "youtube", "יוטיוב" -> {
                 searchInYoutubeIntent((resultData as PossibleMatches).match)
@@ -304,9 +284,10 @@ class PresenterUseCases @Inject constructor() {
             "וואטסאפ", "whatsapp" -> {
                 sendWhatsAppIntent((resultData as ContactsData).number,message)
             }
-            else -> {
-                searchInWebIntent((resultData as ContactsData).number)
+            "חפש","search" -> {
+                searchInWebIntent((resultData as PossibleMatches).match)
             }
+            else->Intent()
         }
         return Observable.just(intent)
     }

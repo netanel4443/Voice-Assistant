@@ -1,22 +1,17 @@
 package com.e.VoiceAssistant.usecases
 
 import android.content.Intent
-import android.graphics.drawable.Drawable
-import com.e.VoiceAssistant.data.SavedAppsDetails
 import com.e.VoiceAssistant.data.AppsDetails
+import com.e.VoiceAssistant.data.SavedAppsDetails
 import com.e.VoiceAssistant.data.repo.RealmRepo
 import com.e.VoiceAssistant.di.annotations.ActivityScope
 import com.e.VoiceAssistant.usecases.commons.RecognizerIntentInit
 import io.reactivex.Completable
 import io.reactivex.Single
 import javax.inject.Inject
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 @ActivityScope
-class SpeechRecognitionUseCases @Inject constructor(
-    private val repo: RealmRepo
-) {
+class SpeechRecognitionUseCases @Inject constructor(private val repo: RealmRepo) {
 
     fun initRecognizerIntent(): Single<Intent> {
         return RecognizerIntentInit().init()

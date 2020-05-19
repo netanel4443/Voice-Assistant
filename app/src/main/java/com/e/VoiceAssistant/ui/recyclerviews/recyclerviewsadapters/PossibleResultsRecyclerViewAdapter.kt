@@ -33,11 +33,13 @@ class PossibleResultsRecyclerViewAdapter():RecyclerView.Adapter<BaseViewHolder>(
                 view=inflater.inflate(R.layout.possible_contacts_results_recycler_design,parent,false)
                 val viewHolder= PossibleContactsResultsViewHolder(view,items,intent)
                 viewHolder.itemClick={itemClick?.invoke(it)}
-                return viewHolder
+                viewHolder
             }
             else->{
                 view= inflater.inflate(R.layout.possible_matches_recycler_design,parent,false)
-                PossibleMatchesViewHolder(view,items,intent)
+                val viewHolder=PossibleMatchesViewHolder(view,items,intent)
+                viewHolder.itemClick={itemClick?.invoke(it)}
+                viewHolder
             }
         }
 

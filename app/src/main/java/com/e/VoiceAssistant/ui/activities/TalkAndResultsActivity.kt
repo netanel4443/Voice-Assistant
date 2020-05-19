@@ -6,14 +6,13 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.speech.SpeechRecognizer
-import android.view.WindowManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.e.VoiceAssistant.R
 import com.e.VoiceAssistant.data.AppsDetails
 import com.e.VoiceAssistant.permissions.CheckOnlyPerrmission
 import com.e.VoiceAssistant.permissions.StartActivityToCheckPermission
-import com.e.VoiceAssistant.presenters.SpeechReconizerTalkAndResultsPresenter
+import com.e.VoiceAssistant.presenters.TalkAndResultsPresenter
 import com.e.VoiceAssistant.presenters.presentersStates.TalkAndResultsPresenterView
 import com.e.VoiceAssistant.sensors.CommandsForSpeechListenerService
 import com.e.VoiceAssistant.sensors.HandleSpeechRecognition
@@ -38,7 +37,7 @@ import javax.inject.Inject
 
 class TalkAndResultsActivity : DaggerAppCompatActivity() , TalkAndResultsPresenterView {
 
-    @Inject lateinit var presenter: SpeechReconizerTalkAndResultsPresenter
+    @Inject lateinit var presenter: TalkAndResultsPresenter
     @Inject lateinit var sharedPrefs: SharedPreferences
     @Inject lateinit var appsDetailsSingleton: AppsDetailsSingleton
     private lateinit var talkIntent: SpeechRecognizer

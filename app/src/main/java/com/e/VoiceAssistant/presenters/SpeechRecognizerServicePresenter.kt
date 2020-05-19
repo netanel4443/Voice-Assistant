@@ -4,14 +4,14 @@ import android.view.Gravity
 import android.view.View
 import com.e.VoiceAssistant.di.annotations.ServiceScope
 import com.e.VoiceAssistant.presenters.presentersStates.SpeechRecognizerServicePresenterState
-import com.e.VoiceAssistant.usecases.PresenterUseCases
+import com.e.VoiceAssistant.usecases.SpeechRecognizerUseCases
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import javax.inject.Inject
 
 @ServiceScope
 class SpeechRecognizerServicePresenter @Inject constructor(
-    private val useCases:PresenterUseCases) {
+    private val useCases:SpeechRecognizerUseCases) {
     private val compositeDisposable=CompositeDisposable()
 
     lateinit var view:SpeechRecognizerServicePresenterState
