@@ -6,7 +6,6 @@ import com.e.VoiceAssistant.R
 import com.e.VoiceAssistant.data.AppsDetails
 import com.e.VoiceAssistant.di.annotations.ActivityScope
 import com.e.VoiceAssistant.presenters.presentersStates.TalkAndResultsPresenterView
-import com.e.VoiceAssistant.ui.recyclerviews.datahelpers.PossibleMatches
 import com.e.VoiceAssistant.ui.recyclerviews.datahelpers.ResultsData
 import com.e.VoiceAssistant.usecases.OpenDesiredAppPresenterUseCase
 import com.e.VoiceAssistant.usecases.TalkAndResultUseCases
@@ -67,27 +66,38 @@ class TalkAndResultsPresenter@Inject constructor(
     }
 
     fun checkIfSecondListenRequired(matches: ArrayList<String>,
-                                appComponent: HashMap<String, AppsDetails>,
-                                contactList: HashMap<String,String> ){
+                                    appComponent: HashMap<String, AppsDetails>,
+                                    contactList: HashMap<String,String> ){
         //todo add cancel option to sms and whatsapp
         if (operation=="הודעה"||operation=="text") {
-            operation=""
-            message=matches[0]
-            lastOperationIntent.putExtra(Intent.EXTRA_TEXT, message)
-            view.navigateToDesiredApp(lastOperationIntent)
+           handleSecondListen(matches[0],::handleSecondListenForSms)
         }
-        else if ( operation=="וואטסאפ"){
-            operation=""
-            message=matches[0]
-            val uri =  Uri.parse(
-                String.format(lastOperationIntent.data.toString()+"&text=%s" ,message)
-            )
-            lastOperationIntent.data=uri
-            view.navigateToDesiredApp(lastOperationIntent)
+        else if ( operation=="וואטסאפ" || operation=="whatsapp"){
+            handleSecondListen(matches[0],::handleSecondListenForWhatsApp)
         }
         else {
             returnRequiredOperationIntent(matches,appComponent,contactList)
         }
+    }
+
+    private fun handleSecondListen(match:String, handleFunc:()->Unit){
+        val tmpIntent=lastOperationIntent
+        lastOperationIntent=Intent() //reset !
+        operation="" //reset!
+        message=match //keep the message if the user wants to change contact
+        handleFunc()
+        view.navigateToDesiredApp(tmpIntent)
+    }
+
+    private fun handleSecondListenForWhatsApp(){
+        val uri =  Uri.parse(
+            String.format(lastOperationIntent.data.toString()+"&text=%s" ,message)
+        )
+        lastOperationIntent.data=uri
+    }
+
+    private fun handleSecondListenForSms(){
+        lastOperationIntent.putExtra(Intent.EXTRA_TEXT, message)
     }
 
     fun returnRequiredOperationIntent(
@@ -97,6 +107,7 @@ class TalkAndResultsPresenter@Inject constructor(
 
         +useCases.returnRequiredOperationIntent(matches)
             .subscribe( {
+                println("operation ${it.first}")
                 operationOfReplacedResult=it.first
                 operation=it.first
                 checkRequestedOperation(it.first,appComponent,contactList,matches,it.second)
@@ -131,20 +142,16 @@ class TalkAndResultsPresenter@Inject constructor(
             .subscribeOnIoAndObserveOnMain()
             .subscribe({ view.navigateToDesiredApp(it.first,it.second as HashSet<ResultsData>,1)},{})
     }
+
     private fun requiredOperationIsSearchInWeb(matches: ArrayList<String>, requiredOpration: String){
-        val hashSet= hashSetOf<PossibleMatches>() as HashSet<ResultsData>
-            matches.forEach {
-                val key=PossibleMatches(it)
-                hashSet.add(key)
-            }
         +useCases.searchInWeb(matches,requiredOpration)
             .subscribeOnIoAndObserveOnMain()
             .subscribe({ view.navigateToDesiredApp(it.first,it.second as HashSet<ResultsData>,1)},{})
     }
     private fun requiredOperationIsNavigate(requiredOpration: String,matches: ArrayList<String>){
-        +useCases.navigateTo(requiredOpration, matches[0])
+        +useCases.navigateTo(requiredOpration, matches)
             .subscribeOnIoAndObserveOnMain()
-            .subscribe({intent->view.navigateToDesiredApp(intent,HashSet(),1)},{})
+            .subscribe({view.navigateToDesiredApp(it.first,it.second as HashSet<ResultsData>,1)},{})
     }
 
     private fun requiredOperationIsOpenAnApp(appComponent: HashMap<String, AppsDetails>, splitedResultsLset:LinkedHashSet<String>){
@@ -193,7 +200,8 @@ class TalkAndResultsPresenter@Inject constructor(
     }
 
     private fun checkIntentType( intent: Intent,contacts:HashSet<ResultsData>){
-              lastOperationIntent=intent
+        println("intent ${intent.data}")
+        lastOperationIntent=intent
               view.secondListenToUser(contacts,0,intent)
     }
 

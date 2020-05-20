@@ -25,23 +25,23 @@ import com.e.VoiceAssistant.userscollectreddata.AppsDetailsSingleton
 import com.e.VoiceAssistant.utils.*
 import com.e.VoiceAssistant.utils.rxJavaUtils.subscribeOnIoAndObserveOnMain
 import com.e.VoiceAssistant.utils.rxJavaUtils.throttle
-import com.e.VoiceAssistant.viewmodels.SpeechRecognitionViewModel
-import com.e.VoiceAssistant.viewmodels.states.SettingsViewModelStates
+import com.e.VoiceAssistant.viewmodels.AddCustomAppNameViewModel
+import com.e.VoiceAssistant.viewmodels.states.AddCustomAppNameStates
 import com.jakewharton.rxbinding.view.RxView
 import kotlinx.android.synthetic.main.activity_main.*
 import javax.inject.Inject
 
-class MainActivity : BaseActivity() {
+class AddCustomAppNameActivity : BaseActivity() {
 
     @Inject lateinit var appsDetailsSingleton:AppsDetailsSingleton
-    private val TAG="MainActivity"
+    private val TAG="AddCustomAppNameActivity"
     private lateinit var selectedApp: SavedAppsDetails
     private var selectedIcon:Drawable?=null
     private lateinit var adapter:AppsDetailsRecyclerViewAdapter
     private lateinit var talkIntent: SpeechRecognizer
     private lateinit var intnt: Intent
     private var appsDetailsHmap=HashMap<String,AppsDetails>()
-    private val viewModel:SpeechRecognitionViewModel by lazy(this::getViewModel)
+    private val viewModel:AddCustomAppNameViewModel by lazy(this::getViewModel)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,18 +56,18 @@ class MainActivity : BaseActivity() {
 
         viewModel.getState().observe(this, Observer{state->
             when(state){ 
-                is SettingsViewModelStates.GetAppsDetails->initUI(state.list)
-                is SettingsViewModelStates.ShowDialog->showOrHideProgressBar(state.visibility)
-                is SettingsViewModelStates.SpeechResult->{
+                is AddCustomAppNameStates.GetAppsDetails->initUI(state.list)
+                is AddCustomAppNameStates.ShowDialog->showOrHideProgressBar(state.visibility)
+                is AddCustomAppNameStates.SpeechResult->{
                     newAppNameSettignsActivity.text=state.appName
                     selectedApp.newName=state.appName
                 }
-                is SettingsViewModelStates.ApplySelectedApp->SetSelectedApp(state.appsDetails)
-                is SettingsViewModelStates.GetCachedData->setCachedSettings(state.appDetailsHmap,state.selectedApp,state.speechResultAppName)
-                is SettingsViewModelStates.AddItemToAppList-> addItemToServiceAppList(state.name,state.activityName,state.pckg,state.icon,state.realName)
-                is SettingsViewModelStates.RemoveItemFromAppList->removeItemfromServiceAppList(state.name)
-                is SettingsViewModelStates.ChangeTalkBtnIcon->changeTalkIcon(state.icon)
-                is SettingsViewModelStates.HandleClick-> handleClick(state.icon)
+                is AddCustomAppNameStates.ApplySelectedApp->SetSelectedApp(state.appsDetails)
+                is AddCustomAppNameStates.GetCachedData->setCachedSettings(state.appDetailsHmap,state.selectedApp,state.speechResultAppName)
+                is AddCustomAppNameStates.AddItemToAppList-> addItemToServiceAppList(state.name,state.activityName,state.pckg,state.icon,state.realName)
+                is AddCustomAppNameStates.RemoveItemFromAppList->removeItemfromServiceAppList(state.name)
+                is AddCustomAppNameStates.ChangeTalkBtnIcon->changeTalkIcon(state.icon)
+                is AddCustomAppNameStates.HandleClick-> handleClick(state.icon)
             }
         })
 
@@ -223,8 +223,6 @@ class MainActivity : BaseActivity() {
             adView.destroy()
         }
         viewModel.resetState()
-     //   println("destroyed")
-
         talkIntent.destroy()
     }
 }

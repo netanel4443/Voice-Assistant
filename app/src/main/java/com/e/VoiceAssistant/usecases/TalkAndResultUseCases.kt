@@ -55,16 +55,8 @@ class TalkAndResultUseCases @Inject constructor() {
     }
 
     fun sendSms(matches:ArrayList<String>, requiredOperation: String, contactList: HashMap<String, String>):Observable<Pair<Intent,HashSet<ContactsData>>>{
-        val namesAndNumbers=HashSet<ContactsData>()
-        return findContact(matches,contactList,requiredOperation)
-            .map { contacts->
-                namesAndNumbers.addAll(contacts)
-                contacts.first().number
-            }
-            .map {contactNumber->
-                val intent=sendSmsIntent(contactNumber)
-                Pair(intent,namesAndNumbers)
-            }
+        return findContact(matches,contactList,requiredOperation,::sendSmsIntent)
+
     }
 
     private fun sendSmsIntent(contactNumber: String):Intent{
@@ -74,17 +66,7 @@ class TalkAndResultUseCases @Inject constructor() {
     }
 
     fun sendWhatsApp(matches:ArrayList<String>, requiredOperation: String, contactList: HashMap<String, String>):Observable<Pair<Intent,HashSet<ContactsData>>>{
-        val namesAndNumbers=HashSet<ContactsData>()
-
-        return findContact(matches,contactList,requiredOperation)
-            .map { contacts->
-                namesAndNumbers.addAll(contacts)
-                contacts.first().number
-            }
-            .map { contactNumber->
-                val intent=sendWhatsAppIntent(contactNumber)
-                Pair(intent,namesAndNumbers)
-            }
+        return findContact(matches,contactList,requiredOperation,::sendWhatsAppIntent)
     }
 
     private fun sendWhatsAppIntent(contactNumber: String):Intent{
@@ -101,20 +83,8 @@ class TalkAndResultUseCases @Inject constructor() {
         return Intent(Intent.ACTION_VIEW).apply { data= uri }
     }
 
-
     fun callTo(matches:ArrayList<String>, requiredOperation: String, contactList: HashMap<String, String>):Observable<Pair<Intent,HashSet<ContactsData>>>{
-        val namesAndNumbers=HashSet<ContactsData>()
-
-        return findContact(matches,contactList,requiredOperation)
-            .map { contacts->
-                println("here at first map?")
-                namesAndNumbers.addAll(contacts)
-                contacts.first().number
-            }
-            .map {contactNumber->
-                val intent=callToIntent(contactNumber)
-                Pair(intent,namesAndNumbers)
-            }
+        return findContact(matches,contactList,requiredOperation,::callToIntent)
     }
 
     private fun callToIntent(contactNumber: String):Intent{
@@ -124,10 +94,7 @@ class TalkAndResultUseCases @Inject constructor() {
     }
 
     fun searchInWeb(matches:ArrayList<String>, requiredOperation: String):Observable<Pair<Intent,HashSet<PossibleMatches>>>{
-        val possibleMatches=getPossibleMatchesWithout(matches,requiredOperation)
-        val finalQuery=possibleMatches.first()
-        val intent=searchInWebIntent(finalQuery.match)
-        return Observable.just(Pair(intent,possibleMatches))
+       return genericSearch(::searchInWebIntent,matches,requiredOperation)
     }
 
     private fun searchInWebIntent(query: String):Intent{
@@ -160,10 +127,7 @@ class TalkAndResultUseCases @Inject constructor() {
     }
 
     fun searchInYoutube(matches: ArrayList<String>, requiredOperation: String):Observable<Pair<Intent,HashSet<PossibleMatches>>>{
-        val possibleMatches=getPossibleMatchesWithout(matches,requiredOperation)
-        val finalQuery=possibleMatches.first()
-        val intent=searchInYoutubeIntent(finalQuery.match)
-        return Observable.just(Pair(intent,possibleMatches))
+          return genericSearch(::searchInYoutubeIntent,matches,requiredOperation)
     }
 
     private fun searchInYoutubeIntent(query:String):Intent{
@@ -174,9 +138,15 @@ class TalkAndResultUseCases @Inject constructor() {
         }
     }
 
-    fun navigateTo(requiredOperation: String,location:String):Observable<Intent> {
-        val finalLocation=removeUnwantedPrefixFromResult(requiredOperation,location)
-        return Observable.just(navigateToIntent(finalLocation))
+    fun navigateTo(requiredOperation: String,matches: ArrayList<String>):Observable<Pair<Intent,HashSet<PossibleMatches>>> {
+          return genericSearch(::navigateToIntent,matches,requiredOperation)
+    }
+
+    private fun genericSearch(intentFunc:(String)->Intent, matches: ArrayList<String>, requiredOperation: String):Observable<Pair<Intent,HashSet<PossibleMatches>>>{
+        val possibleMatches=getPossibleMatchesWithout(matches,requiredOperation)
+        val finalQuery=possibleMatches.first()
+        val intent=intentFunc(finalQuery.match)
+        return Observable.just(Pair(intent,possibleMatches))
     }
 
     private fun navigateToIntent(location:String):Intent{
@@ -233,13 +203,17 @@ class TalkAndResultUseCases @Inject constructor() {
         }
         return finalResult
     }
-    private fun findContact(matches: ArrayList<String>, contactList: HashMap<String, String>, requiredOperation: String):Observable<HashSet<ContactsData>>{
+    private fun findContact(matches: ArrayList<String>,
+                            contactList: HashMap<String, String>,
+                            requiredOperation: String,
+                            intentFunc:(String)->Intent):Observable<Pair<Intent,HashSet<ContactsData>>>{
+        val namesAndNumbers=HashSet<ContactsData>()
 
         return Observable.fromCallable {
 
             val tmpNameAndNumberHmap=HashSet<ContactsData>()
             matches.forEach {
-                val stringToSearch=it.toLowerCase(Locale.getDefault())
+                val stringToSearch=it.toLowerCase()
                 val contactName=removeUnwantedPrefixFromResult(requiredOperation,stringToSearch)
                 if (contactList.containsKey(contactName)){
                     tmpNameAndNumberHmap.add(ContactsData(contactName,contactList[contactName].toString()))
@@ -255,10 +229,18 @@ class TalkAndResultUseCases @Inject constructor() {
                     }
                 }
             }
-            println("size $tmpNameAndNumberHmap")
+         //   println("size $tmpNameAndNumberHmap")
             tmpNameAndNumberHmap
         }
             .filter { it.isNotEmpty() }
+            .map { contacts->
+                namesAndNumbers.addAll(contacts)
+                contacts.first().number
+            }
+            .map { contactNumber->
+                val intent=intentFunc(contactNumber)
+                Pair(intent,namesAndNumbers)
+            }
     }
 
     fun changeSelectedResult(requiredOperation:String,

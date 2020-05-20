@@ -11,26 +11,24 @@ import com.e.VoiceAssistant.data.AppsDetails
 import com.e.VoiceAssistant.usecases.SpeechRecognitionUseCases
 import com.e.VoiceAssistant.utils.rxJavaUtils.subscribeOnIoAndObserveOnMain
 import com.e.VoiceAssistant.utils.rxJavaUtils.throttle
-import com.e.VoiceAssistant.viewmodels.states.SettingsViewModelStates
+import com.e.VoiceAssistant.viewmodels.states.AddCustomAppNameStates
 import io.reactivex.Single
 import io.reactivex.subjects.PublishSubject
-import java.util.*
 import javax.inject.Inject
-import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.LinkedHashMap
 
-class SpeechRecognitionViewModel @Inject constructor(
+class AddCustomAppNameViewModel @Inject constructor(
     private val  useCases: SpeechRecognitionUseCases
 ): BaseViewModel() {
-    private val TAG="SpeechRecognitionViewModel"
+    private val TAG="AddCustomAppNameViewModel"
     private var appsDetailsHmap=HashMap<String,AppsDetails>()
     private var addedApps= LinkedHashMap<String,Drawable?>()
-    private var state=MutableLiveData<SettingsViewModelStates>()
+    private var state=MutableLiveData<AddCustomAppNameStates>()
     private var selectedApp=AppsDetails("","","",null)
     private var speechResultAppName=""
     private var talkBtnIcon=R.drawable.ic_mic_white_background_24
-    private val clickSubject= PublishSubject.create<SettingsViewModelStates>()
+    private val clickSubject= PublishSubject.create<AddCustomAppNameStates>()
 
     init {
         +clickSubject.throttle()
@@ -39,23 +37,23 @@ class SpeechRecognitionViewModel @Inject constructor(
     }
 
     fun resetState(){
-        state.setValue(SettingsViewModelStates.Idle)
+        state.setValue(AddCustomAppNameStates.Idle)
     }
 
-    fun getState()=state as LiveData<SettingsViewModelStates>
+    fun getState()=state as LiveData<AddCustomAppNameStates>
 
     fun showDialog(visibility: Int){
-        state.value = SettingsViewModelStates.ShowDialog(visibility)
+        state.value = AddCustomAppNameStates.ShowDialog(visibility)
     }
 
     fun setAppResultText(appName:String){
         speechResultAppName=appName
-        state.value = SettingsViewModelStates.SpeechResult(appName)
+        state.value = AddCustomAppNameStates.SpeechResult(appName)
     }
 
     fun applySelectedApp(appsDetails: AppsDetails){
         selectedApp=appsDetails
-        state.value = SettingsViewModelStates.ApplySelectedApp(appsDetails)
+        state.value = AddCustomAppNameStates.ApplySelectedApp(appsDetails)
     }
 
     fun initRecognizerIntent(): Single<Intent> {
@@ -63,7 +61,7 @@ class SpeechRecognitionViewModel @Inject constructor(
     }
 
     fun saveApp(appToBeSaved: SavedAppsDetails, icon:Drawable?){
-        /* because we immediately set a new value in MainActivity to appToBeSaved.newName(although kotlin is by value , the object.newname points to same place in memory) ,
+        /* because we immediately set a new value in AddCustomAppNameActivity to appToBeSaved.newName(although kotlin is by value , the object.newname points to same place in memory) ,
        the value changes that's why we need to cache it before it changes*/
         val tmpNewName=appToBeSaved.newName
         val realName=appToBeSaved.realName
@@ -95,23 +93,23 @@ class SpeechRecognitionViewModel @Inject constructor(
     }
 
     private fun removeItemFromAppList(name:String){
-        state.value=SettingsViewModelStates.RemoveItemFromAppList(name)
+        state.value=AddCustomAppNameStates.RemoveItemFromAppList(name)
     }
     private fun addItemToAppList( name:String, activityName:String, pckg:String, icon:Drawable?,realName:String){
-        state.value=SettingsViewModelStates.AddItemToAppList(name,activityName,pckg,icon,realName)
+        state.value=AddCustomAppNameStates.AddItemToAppList(name,activityName,pckg,icon,realName)
     }
 
     fun initCachedSettingsActivityUI(){
-        state.value = SettingsViewModelStates.GetCachedData(appsDetailsHmap,selectedApp,speechResultAppName)
+        state.value = AddCustomAppNameStates.GetCachedData(appsDetailsHmap,selectedApp,speechResultAppName)
     }
 
     fun initSettingsActivityUI(list:HashMap<String, AppsDetails>) {
         appsDetailsHmap=list
-        state.value = SettingsViewModelStates.GetAppsDetails(list)
+        state.value = AddCustomAppNameStates.GetAppsDetails(list)
     }
 
     fun handleTalkOrStopClick() {
-        clickSubject.onNext(SettingsViewModelStates.HandleClick(talkBtnIcon))
+        clickSubject.onNext(AddCustomAppNameStates.HandleClick(talkBtnIcon))
     }
 
     fun changeTalkBtnIcon(){
@@ -120,23 +118,12 @@ class SpeechRecognitionViewModel @Inject constructor(
         } else{
             R.drawable.ic_mic_white_background_24
         }
-        state.value=SettingsViewModelStates.ChangeTalkBtnIcon(talkBtnIcon)
+        state.value=AddCustomAppNameStates.ChangeTalkBtnIcon(talkBtnIcon)
     }
 
     fun checkIfTalkBtnIconChanged(){
         if (talkBtnIcon==R.drawable.ic_pause_white_background_24){
-            clickSubject.onNext(SettingsViewModelStates.HandleClick(talkBtnIcon))
+            clickSubject.onNext(AddCustomAppNameStates.HandleClick(talkBtnIcon))
         }
-    }
-
-    fun getStoredAppsDetails(hashMap: HashMap<String, AppsDetails>) {
-        +useCases.getAppsListFromDB()
-            .flatMap { useCases.addToSavedAppsProperIcon(it,hashMap) }
-            .subscribeOnIoAndObserveOnMain()
-            .subscribe({
-                state.value=SettingsViewModelStates.StoredAppsDetails(it)
-            },{
-              /*  it.printStackTrace()*/
-            })
     }
 }

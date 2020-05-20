@@ -15,6 +15,7 @@
           android:layout_width="wrap_content"
           android:layout_height="match_parent"
           android:text="@string/on_boarding_descrption"
+          android:fontFamily="@font/davidlibre"
           android:layout_margin="10dp"/>
         <TextView
             android:layout_width="match_parent"

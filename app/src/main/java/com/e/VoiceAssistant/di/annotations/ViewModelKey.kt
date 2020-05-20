@@ -1,4 +1,4 @@
-package com.e.VoiceAssistant.di.viewmodels
+package com.e.VoiceAssistant.di.annotations
 
 import androidx.lifecycle.ViewModel
 import dagger.MapKey

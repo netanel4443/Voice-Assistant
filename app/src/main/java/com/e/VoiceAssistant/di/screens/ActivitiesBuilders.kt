@@ -1,12 +1,12 @@
 package com.e.VoiceAssistant.di.screens
 
-import com.e.VoiceAssistant.ui.activities.MainActivity
+import com.e.VoiceAssistant.ui.activities.AddCustomAppNameActivity
 import com.e.VoiceAssistant.di.annotations.ActivityScope
-import com.e.VoiceAssistant.di.viewmodels.OnBoardingViewModelModule
-import com.e.VoiceAssistant.di.viewmodels.ViewModelsModule
+import com.e.VoiceAssistant.di.modules.ViewModelFactoryModule
+import com.e.VoiceAssistant.di.modules.ViewModelsModule
 import com.e.VoiceAssistant.ui.activities.TalkAndResultsActivity
 import com.e.VoiceAssistant.ui.onboarding.OnBoardingActivity
-import com.e.VoiceAssistant.ui.splashScreen.WelcomeSplashActivity
+import com.e.VoiceAssistant.ui.splashScreen.LoadDataSplashActivity
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
 
@@ -16,20 +16,25 @@ abstract class ActivitiesBuilders {
     @ActivityScope
     @ContributesAndroidInjector(
         modules = [ViewModelsModule::class,
-                    FragmentBuilders::class])
-    abstract fun contributeMainActivity(): MainActivity
+                   FragmentBuilders::class,
+                   ViewModelFactoryModule::class
+        ])
+    abstract fun contributeAddCustomAppNameActivity(): AddCustomAppNameActivity
 
     @ActivityScope
-    @ContributesAndroidInjector(modules = [
-        OnBoardingViewModelModule::class])
+    @ContributesAndroidInjector(
+        modules = [ViewModelFactoryModule::class
+        ])
     abstract fun contributeOnBoardingActivity():OnBoardingActivity
 
     @ActivityScope
-    @ContributesAndroidInjector(modules = [
-        ViewModelsModule::class])
-    abstract fun contributeWelcomeSplashScreen():WelcomeSplashActivity
+    @ContributesAndroidInjector(
+        modules = [ViewModelFactoryModule::class
+        ])
+    abstract fun contributeLoadDataSplashActivity(): LoadDataSplashActivity
 
     @ActivityScope
     @ContributesAndroidInjector
     abstract fun contributeTalkAndResultsActivity(): TalkAndResultsActivity
+
 }

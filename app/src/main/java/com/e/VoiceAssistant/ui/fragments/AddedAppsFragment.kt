@@ -12,8 +12,8 @@ import com.e.VoiceAssistant.R
 import com.e.VoiceAssistant.data.AppsDetails
 import com.e.VoiceAssistant.ui.recyclerviews.recyclerviewsadapters.AddedAppsRecyclerAdapter
 import com.e.VoiceAssistant.userscollectreddata.AppsDetailsSingleton
-import com.e.VoiceAssistant.viewmodels.SpeechRecognitionViewModel
-import com.e.VoiceAssistant.viewmodels.states.SettingsViewModelStates
+import com.e.VoiceAssistant.viewmodels.AddCustomAppNameViewModel
+import com.e.VoiceAssistant.viewmodels.states.AddCustomAppNameStates
 import kotlinx.android.synthetic.main.fragment_added_apps.*
 import javax.inject.Inject
 
@@ -21,7 +21,7 @@ class AddedAppsFragment : BaseFragment() {
     private val TAG="BaseFragment"
     private lateinit var adapter: AddedAppsRecyclerAdapter
     var addedApps=HashMap<String,AppsDetails>()
-    private val viewModel:SpeechRecognitionViewModel by lazy(this::getViewModel)
+    private val viewModel:AddCustomAppNameViewModel by lazy(this::getViewModel)
 
     @Inject lateinit var appsDetailsSingleton: AppsDetailsSingleton
 
@@ -42,7 +42,7 @@ class AddedAppsFragment : BaseFragment() {
 
         viewModel.getState().observe(viewLifecycleOwner, Observer {state->
             when(state){
-                 is SettingsViewModelStates.RemoveItemFromAppList->removeItemfromServiceAppList(state.name)
+                 is AddCustomAppNameStates.RemoveItemFromAppList->removeItemfromServiceAppList(state.name)
             }
         })
     }

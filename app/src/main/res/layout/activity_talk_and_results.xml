@@ -20,4 +20,21 @@
         app:layout_constraintRight_toRightOf="parent"
         android:layout_marginBottom="20dp"
         android:background="@drawable/ic_mic_white_background_24"/>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/counterTalkAndResultParent"
+        android:visibility="gone">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/counterTalkAndResult"
+            android:textSize="150sp"
+            android:fontFamily="@font/bellefair"
+            android:textColor="#2196F3"
+            android:textStyle="bold"
+            android:textAlignment="center"
+            android:layout_centerInParent="true"/>
+    </RelativeLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

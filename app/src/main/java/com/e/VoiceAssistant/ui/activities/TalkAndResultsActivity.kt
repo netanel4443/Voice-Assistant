@@ -6,6 +6,8 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.speech.SpeechRecognizer
+import android.view.View
+import android.view.animation.AnimationUtils
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.e.VoiceAssistant.R
@@ -32,8 +34,10 @@ import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_talk_and_results.*
 import rx.Subscription
 import rx.subscriptions.CompositeSubscription
+import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import kotlin.collections.HashMap
 
 class TalkAndResultsActivity : DaggerAppCompatActivity() , TalkAndResultsPresenterView {
 
@@ -54,12 +58,12 @@ class TalkAndResultsActivity : DaggerAppCompatActivity() , TalkAndResultsPresent
         setContentView(R.layout.activity_talk_and_results)
 
         firstInits()
-        initContactListAndSpeechRecognition()
+                initContactListAndSpeechRecognition ()
 
-        clickToTalkOrStopBtn.setOnClickListener{
+                clickToTalkOrStopBtn . setOnClickListener {
             presenter.handleTalkOrStopClick()
         }
-    }
+        }
 
     private fun firstInits() {
         presenter.bindView(this)
@@ -151,6 +155,8 @@ class TalkAndResultsActivity : DaggerAppCompatActivity() , TalkAndResultsPresent
 
     override fun navigateToDesiredApp(intent: Intent) {
         if (checkIfPermissionRequired(intent)) {
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+                    Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
             try {
                 startActivity(intent)
             }
@@ -164,8 +170,8 @@ class TalkAndResultsActivity : DaggerAppCompatActivity() , TalkAndResultsPresent
     }
 
     override fun secondListenToUser(contacts:HashSet<ResultsData>,dataType: Int,intent: Intent) {
-        /* timer is needed because of throttle click(rxBinding) .
-         After a user clicks on the "talk" button when he wants to pause the speechrecognition*/
+        /** timer is needed because of throttle click(rxBinding) .
+           After a user clicks on the [talk] button when he wants to pause the speech recognition*/
         adapter.attachData(contacts,0,intent)
         var counter=3
         +Observable.fromCallable{counter}
@@ -174,18 +180,23 @@ class TalkAndResultsActivity : DaggerAppCompatActivity() , TalkAndResultsPresent
             .map {
                 counter -= 1
                 counter
-            }
-            .repeatUntil { counter==0 }
+            }.repeat(3)
             .observeOn(AndroidSchedulers.mainThread())
-            .doOnNext { toast("$it")  }
+            .doOnNext {
+                counterTalkAndResultParent.visibility= View.VISIBLE
+                animate()
+                counterTalkAndResult.text=it.toString()  }
             .filter { it==0 }
             .subscribe({
-                counter=3
+                counterTalkAndResultParent.visibility= View.GONE
                 println("are tyou here")
                 presenter.handleTalkOrStopClick()
             },{})
     }
-
+private fun animate(){
+    val slide=   AnimationUtils.loadAnimation(this, R.anim.slide_from_left_to_right)
+    counterTalkAndResult.startAnimation(slide)
+}
     private fun checkIfPermissionRequired(intent: Intent):Boolean {
         return when(intent.action){
             Intent.ACTION_DIAL-> CheckOnlyPerrmission.check(this, Manifest.permission.READ_CONTACTS)
@@ -195,7 +206,7 @@ class TalkAndResultsActivity : DaggerAppCompatActivity() , TalkAndResultsPresent
     }
 
     override fun openSettingsActivity() {
-        val intent = Intent(this, MainActivity::class.java)
+        val intent = Intent(this, AddCustomAppNameActivity::class.java)
         startActivity(intent)
     }
 

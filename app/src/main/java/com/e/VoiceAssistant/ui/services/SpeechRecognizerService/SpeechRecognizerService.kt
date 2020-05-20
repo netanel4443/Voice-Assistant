@@ -18,7 +18,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.e.VoiceAssistant.R
 import com.e.VoiceAssistant.presenters.SpeechRecognizerServicePresenter
 import com.e.VoiceAssistant.presenters.presentersStates.SpeechRecognizerServicePresenterState
-import com.e.VoiceAssistant.ui.activities.MainActivity
+import com.e.VoiceAssistant.ui.activities.AddCustomAppNameActivity
 import com.e.VoiceAssistant.ui.activities.TalkAndResultsActivity
 import com.e.VoiceAssistant.ui.dialogs.FloatingRepresentOperationsDialog
 import com.e.VoiceAssistant.ui.onboarding.OnBoardingActivity
@@ -163,8 +163,7 @@ class SpeechRecognizerService : BaseService(), SpeechRecognizerServicePresenterS
     }
 
     fun navigateToDesiredApp(intent: Intent){
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or
-                Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         try {
             startActivity(intent)
         } catch (e: ActivityNotFoundException) {
@@ -172,7 +171,7 @@ class SpeechRecognizerService : BaseService(), SpeechRecognizerServicePresenterS
         }
     }
     override fun openSettingsActivity() {
-        val intent = Intent(this, MainActivity::class.java)
+        val intent = Intent(this, AddCustomAppNameActivity::class.java)
         navigateToDesiredApp(intent)
     }
 

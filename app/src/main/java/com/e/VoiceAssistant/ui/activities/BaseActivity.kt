@@ -1,5 +1,7 @@
 package com.e.VoiceAssistant.ui.activities
 
+import android.os.Bundle
+import android.os.PersistableBundle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.e.VoiceAssistant.ui.dialogs.CircleProgressBarDialog
@@ -26,7 +28,6 @@ abstract class BaseActivity:DaggerAppCompatActivity() {
 
     protected inline operator fun<reified T : Disposable> T.unaryPlus() =
         compositeDisposable.add(this)
-
 
 
     override fun onDestroy() {

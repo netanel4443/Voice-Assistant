@@ -19,15 +19,17 @@ import com.e.VoiceAssistant.ui.services.SpeechRecognizerService.SpeechRecognizer
 import com.e.VoiceAssistant.userscollectreddata.AppsDetailsSingleton
 import com.e.VoiceAssistant.utils.rxJavaUtils.subscribeOnIoAndObserveOnMain
 import com.e.VoiceAssistant.utils.toastLong
-import com.e.VoiceAssistant.viewmodels.SpeechRecognitionViewModel
-import com.e.VoiceAssistant.viewmodels.states.SettingsViewModelStates
+import com.e.VoiceAssistant.viewmodels.AddCustomAppNameViewModel
+import com.e.VoiceAssistant.viewmodels.LoadDataViewModel
+import com.e.VoiceAssistant.viewmodels.commands.LoadDataCommands
+import com.e.VoiceAssistant.viewmodels.states.AddCustomAppNameStates
 import com.tbruyelle.rxpermissions2.RxPermissions
 import javax.inject.Inject
 
-class WelcomeSplashActivity : BaseActivity() {
+class LoadDataSplashActivity : BaseActivity() {
 
     @Inject lateinit var appsDetailsSingleton: AppsDetailsSingleton
-    private val viewModel:SpeechRecognitionViewModel by lazy(this::getViewModel)
+    private val viewModel: LoadDataViewModel by lazy(this::getViewModel)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,9 +39,9 @@ class WelcomeSplashActivity : BaseActivity() {
     }
 
     private fun setLiveDataObserver() {
-        viewModel.getState().observe(this, Observer{state->
+        viewModel.commands.observe(this, Observer{state->
             when(state){
-                is SettingsViewModelStates.StoredAppsDetails->addSavedAppsFromMemoryToList(state.list)
+                is LoadDataCommands.StoredAppsDetails->addSavedAppsFromMemoryToList(state.list)
             }
         })
     }
@@ -62,12 +64,6 @@ class WelcomeSplashActivity : BaseActivity() {
         }
     }
 
-   private fun checkPermissionAndStartService(){
-       if (RequestGlobalPermission.check(this,permission.RECORD_AUDIO,RequestCodes.RECORD_AUDIO)) {
-            startService( Intent(this, SpeechRecognizerService::class.java))
-           finishAndRemoveTask()
-       }
-   }
 
     private fun initAppsDetails() {
 
