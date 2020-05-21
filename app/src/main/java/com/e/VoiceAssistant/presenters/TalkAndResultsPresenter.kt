@@ -11,11 +11,14 @@ import com.e.VoiceAssistant.usecases.OpenDesiredAppPresenterUseCase
 import com.e.VoiceAssistant.usecases.TalkAndResultUseCases
 import com.e.VoiceAssistant.utils.rxJavaUtils.subscribeOnIoAndObserveOnMain
 import com.e.VoiceAssistant.utils.rxJavaUtils.throttle
+import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @ActivityScope
@@ -202,7 +205,21 @@ class TalkAndResultsPresenter@Inject constructor(
     private fun checkIntentType( intent: Intent,contacts:HashSet<ResultsData>){
         println("intent ${intent.data}")
         lastOperationIntent=intent
-              view.secondListenToUser(contacts,0,intent)
+        view.secondListenToUser(contacts,0,intent)
+    }
+
+    fun countDownTimerAnimation():Observable<Int>{
+        var counter=3
+        return Observable.fromCallable{counter}
+            .subscribeOn(AndroidSchedulers.mainThread())
+            .doOnNext {count-> view.timerAnimation(count) }
+            .delay(1, TimeUnit.SECONDS,Schedulers.io())
+            .map {
+                counter -= 1
+                counter
+            }.repeat(3)
+            .observeOn(AndroidSchedulers.mainThread())
+            .filter {count-> count==0 }
     }
 
     private operator fun Disposable.unaryPlus(){

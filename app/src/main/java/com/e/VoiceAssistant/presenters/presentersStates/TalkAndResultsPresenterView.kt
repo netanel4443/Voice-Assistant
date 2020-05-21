@@ -11,4 +11,5 @@ interface TalkAndResultsPresenterView {
     fun openSettingsActivity()
     fun changeTalkIcon(icon:Int)
     fun secondListenToUser(contacts:HashSet<ResultsData>, dataType: Int, intent: Intent)
+    fun timerAnimation(counter:Int)
 }

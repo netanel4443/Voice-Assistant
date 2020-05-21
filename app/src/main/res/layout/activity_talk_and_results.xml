@@ -11,6 +11,22 @@
         android:layout_height="match_parent"
         android:id="@+id/possibleResultsRecyclerView"
         android:layout_marginBottom="100dp"/>
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        app:cardUseCompatPadding="true"
+        android:elevation="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginBottom="50dp">
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/operationsWordsRecyclerView"
+        />
+    </androidx.cardview.widget.CardView>
+
     <Button
         android:layout_width="50dp"
         android:layout_height="50dp"
@@ -18,8 +34,18 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="50dp"
         android:background="@drawable/ic_mic_white_background_24"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/click_to_talk_or_stop"
+        android:fontFamily="@font/davidlibre"
+        android:textColor="#ffff"
+        app:layout_constraintTop_toBottomOf="@id/clickToTalkOrStopBtn"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginTop="5dp"/>
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"

@@ -2,7 +2,6 @@ package com.e.VoiceAssistant.ui.recyclerviews.viewholders
 
 import android.content.Intent
 import android.view.View
-import androidx.recyclerview.widget.RecyclerView
 import com.e.VoiceAssistant.ui.recyclerviews.datahelpers.ContactsData
 import com.e.VoiceAssistant.ui.recyclerviews.datahelpers.ResultsData
 import kotlinx.android.synthetic.main.possible_contacts_results_recycler_design.view.*

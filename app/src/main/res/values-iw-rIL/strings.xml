@@ -43,6 +43,7 @@
     <string name="permission_ask_never_again">
         אפשר/י דרך: הגדרות>יישומים>Voice Assistant>הרשאות>
     </string>
+    <string name="click_to_talk_or_stop">לחץ על מנת לדבר או להפסיק</string>
 
     <string-array name="operations_explanation">
         <item>

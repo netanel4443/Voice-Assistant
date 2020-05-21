@@ -19,6 +19,7 @@ import com.e.VoiceAssistant.presenters.presentersStates.TalkAndResultsPresenterV
 import com.e.VoiceAssistant.sensors.CommandsForSpeechListenerService
 import com.e.VoiceAssistant.sensors.HandleSpeechRecognition
 import com.e.VoiceAssistant.ui.recyclerviews.datahelpers.ResultsData
+import com.e.VoiceAssistant.ui.recyclerviews.recyclerviewsadapters.OperationsKeyWordsAdapter
 import com.e.VoiceAssistant.ui.recyclerviews.recyclerviewsadapters.PossibleResultsRecyclerViewAdapter
 import com.e.VoiceAssistant.usecases.ContactList
 import com.e.VoiceAssistant.userscollectreddata.AppsDetailsSingleton
@@ -27,15 +28,12 @@ import com.e.VoiceAssistant.utils.toast
 import com.e.VoiceAssistant.utils.toastLong
 import dagger.android.support.DaggerAppCompatActivity
 import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_talk_and_results.*
 import rx.Subscription
 import rx.subscriptions.CompositeSubscription
 import java.util.*
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.collections.HashMap
 
@@ -58,17 +56,26 @@ class TalkAndResultsActivity : DaggerAppCompatActivity() , TalkAndResultsPresent
         setContentView(R.layout.activity_talk_and_results)
 
         firstInits()
-                initContactListAndSpeechRecognition ()
+        initContactListAndSpeechRecognition ()
 
-                clickToTalkOrStopBtn . setOnClickListener {
+        clickToTalkOrStopBtn . setOnClickListener {
             presenter.handleTalkOrStopClick()
         }
-        }
+    }
 
     private fun firstInits() {
         presenter.bindView(this)
         appsDetailsHmap=appsDetailsSingleton.appsAndStoredAppsDetails
         initRecyclerView()
+        initOperationsRecyclerView()
+    }
+
+    private fun initOperationsRecyclerView() {
+    val operationAdapter= OperationsKeyWordsAdapter()
+        operationsWordsRecyclerView.adapter=operationAdapter
+        operationsWordsRecyclerView.layoutManager=LinearLayoutManager(this,RecyclerView.HORIZONTAL,false)
+        operationsWordsRecyclerView.setHasFixedSize(true)
+        operationAdapter.attachData(resources.getStringArray(R.array.operations_explanation).toHashSet())
     }
 
     private fun initRecyclerView() {
@@ -138,7 +145,7 @@ class TalkAndResultsActivity : DaggerAppCompatActivity() , TalkAndResultsPresent
     }
 
     override fun navigateToDesiredApp(intent: Intent, results: HashSet<ResultsData>,dataType: Int) {
-        println("send sms? ${intent.action}")
+    //    println("send sms? ${intent.action}")
         if (checkIfPermissionRequired(intent))
         {
             try {
@@ -173,34 +180,24 @@ class TalkAndResultsActivity : DaggerAppCompatActivity() , TalkAndResultsPresent
         /** timer is needed because of throttle click(rxBinding) .
            After a user clicks on the [talk] button when he wants to pause the speech recognition*/
         adapter.attachData(contacts,0,intent)
-        var counter=3
-        +Observable.fromCallable{counter}
-            .subscribeOn(Schedulers.io())
-            .delay(1, TimeUnit.SECONDS)
-            .map {
-                counter -= 1
-                counter
-            }.repeat(3)
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnNext {
-                counterTalkAndResultParent.visibility= View.VISIBLE
-                animate()
-                counterTalkAndResult.text=it.toString()  }
-            .filter { it==0 }
+
+        +presenter.countDownTimerAnimation()
             .subscribe({
                 counterTalkAndResultParent.visibility= View.GONE
-                println("are tyou here")
                 presenter.handleTalkOrStopClick()
-            },{})
+            }, {})
     }
-private fun animate(){
-    val slide=   AnimationUtils.loadAnimation(this, R.anim.slide_from_left_to_right)
-    counterTalkAndResult.startAnimation(slide)
-}
+
+    override  fun timerAnimation(counter:Int){
+        counterTalkAndResultParent.visibility= View.VISIBLE
+        val fadeOut=   AnimationUtils.loadAnimation(this, R.anim.fade_out)
+        counterTalkAndResult.startAnimation(fadeOut)
+        counterTalkAndResult.text=counter.toString()
+    }
+
     private fun checkIfPermissionRequired(intent: Intent):Boolean {
         return when(intent.action){
             Intent.ACTION_DIAL-> CheckOnlyPerrmission.check(this, Manifest.permission.READ_CONTACTS)
-
             else ->true
         }
     }

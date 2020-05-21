@@ -34,6 +34,7 @@
     <string name="permission_ask_never_again">
     Enable at Settings>Apps>Voice Assistant>Permissions>
     </string>
+    <string name="click_to_talk_or_stop">Click in order to talk or stop</string>
 
     <string-array name="operations_explanation">
         <item>\u2022 Call Daniel</item>
