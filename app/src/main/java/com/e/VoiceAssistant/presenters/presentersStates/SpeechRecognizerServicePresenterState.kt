@@ -8,5 +8,5 @@ interface SpeechRecognizerServicePresenterState {
    fun initWindowManager(params: WindowManager.LayoutParams,
                          trashParams: WindowManager.LayoutParams )
    fun openSettingsActivity()
-   fun handleMenuClick(visibility: Int)
+   fun showOrDismissTrash(visibility: Int)
 }

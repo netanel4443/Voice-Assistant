@@ -11,6 +11,7 @@ import com.e.VoiceAssistant.ui.recyclerviews.datahelpers.ContactsData
 import com.e.VoiceAssistant.ui.recyclerviews.datahelpers.PossibleMatches
 import com.e.VoiceAssistant.ui.recyclerviews.datahelpers.ResultsData
 import com.e.VoiceAssistant.usecases.commons.RecognizerIntentInit
+import com.e.VoiceAssistant.userscollectreddata.AppsDetailsSingleton
 import io.reactivex.Observable
 import io.reactivex.Single
 import java.util.*
@@ -19,10 +20,12 @@ import kotlin.collections.HashSet
 import kotlin.collections.LinkedHashSet
 
 @ActivityScope
-class TalkAndResultUseCases @Inject constructor() {
+class TalkAndResultUseCases @Inject constructor(
+    private val loadedData:AppsDetailsSingleton
+) {
     private val requiredOperationsHset=
         hashSetOf("הודעה","text","וואטסאפ","whatsapp",
-            "נווט","navigate","youtube","יוטיוב","ספוטיפיי","spotify",
+          "youtube","יוטיוב","ספוטיפיי","spotify",
             "call","התקשר","תקשר","תתקשר","search", "פתח","אופן","open","חפש")
     //todo fix send sms/whatsapp bug , sends sms  even if I canceled the second record
 
@@ -40,10 +43,12 @@ class TalkAndResultUseCases @Inject constructor() {
             matches.forEach {
                 val st = StringTokenizer(it, " ")
 
-                while (st.hasMoreTokens()) {//todo check the locality if works properly on en-US
+                while (st.hasMoreTokens()) {
                     val nextToken = st.nextToken().toLowerCase(Locale.getDefault())
-
+                    //todo change contains to substring algorithm
                     if (requiredOperation.isEmpty() && requiredOperationsHset.contains(nextToken)) {
+//                       requiredOperationsHset.filter {it.contains(nextToken)  }
+//                           .map { requiredOperation=it.substring(it.indexOf(nextToken),0) }
                         requiredOperation = nextToken
                     }
                     splitedResultsLhset.add(nextToken)
@@ -70,17 +75,30 @@ class TalkAndResultUseCases @Inject constructor() {
     }
 
     private fun sendWhatsAppIntent(contactNumber: String):Intent{
+        val contactWithCountryDigits=addCountryPhoneDigits(contactNumber)
         val uri =  Uri.parse(
-            String.format("https://api.whatsapp.com/send?phone=%s", contactNumber)
+            String.format("https://api.whatsapp.com/send?phone=%s", contactWithCountryDigits)
         )
         return Intent(Intent.ACTION_VIEW).apply { data= uri }
     }
 
     private fun sendWhatsAppIntent(contactNumber: String,message:String):Intent {
+        val contactWithCountryDigits=addCountryPhoneDigits(contactNumber)
         val uri =  Uri.parse(
-            String.format("https://api.whatsapp.com/send?phone=%s&text=%s", contactNumber,message)
+            String.format("https://api.whatsapp.com/send?phone=%s&text=%s", contactWithCountryDigits,message)
         )
         return Intent(Intent.ACTION_VIEW).apply { data= uri }
+    }
+    private fun addCountryPhoneDigits(contactNumber: String):String{
+       var contactWithCountryDigits=contactNumber
+       val digits=loadedData.countryLocaleDigits
+
+       return if (!contactNumber.startsWith(digits)) {
+           contactWithCountryDigits=digits+contactNumber
+           contactWithCountryDigits
+       } else {
+           contactNumber
+       }
     }
 
     fun callTo(matches:ArrayList<String>, requiredOperation: String, contactList: HashMap<String, String>):Observable<Pair<Intent,HashSet<ContactsData>>>{
@@ -134,7 +152,6 @@ class TalkAndResultUseCases @Inject constructor() {
         return Intent(Intent.ACTION_SEARCH).apply {
             setPackage("com.google.android.youtube")
             putExtra(SearchManager.QUERY, query)
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
     }
 
@@ -157,15 +174,18 @@ class TalkAndResultUseCases @Inject constructor() {
     private fun getPossibleMatchesWithout(matches:ArrayList<String>,requiredOperation: String):HashSet<PossibleMatches>{
         val possibleMatches=HashSet<PossibleMatches>()
         matches.forEach { match->
-            getFinalQuery(match,requiredOperation).let {
-                possibleMatches.add(PossibleMatches(it))
+            getFinalQuery(match.toLowerCase(),requiredOperation).let {
+
+                if (it.isNotBlank()) {
+                    possibleMatches.add(PossibleMatches(it))
+                }
             }
         }
         return possibleMatches
     }
 
-    /** this function deletes the keyword in order to get pure string the use wants to search.
-     * In addition it deletes all previous words before desired keyword
+    /** this function deletes the keyword in order to get pure string the user wants to search.
+     *  In addition it deletes all previous words before the desired keyword
      *  if [query] string doesn't contain [requiredOperation] then,
      * [return] an empty string and don't execute if's block,
      * because [indexOf] will return -1 and error will occur */
@@ -179,7 +199,7 @@ class TalkAndResultUseCases @Inject constructor() {
                     .removePrefix(" ")
                 }
         }
-        else { "" }
+        else { "" } // if "" is returned , we need to handle this case at the place which this func was called from.
     }
 
     private fun removeUnwantedPrefixFromResult(requiredOperation: String, result:String):String{
@@ -212,6 +232,7 @@ class TalkAndResultUseCases @Inject constructor() {
         return Observable.fromCallable {
 
             val tmpNameAndNumberHmap=HashSet<ContactsData>()
+
             matches.forEach {
                 val stringToSearch=it.toLowerCase()
                 val contactName=removeUnwantedPrefixFromResult(requiredOperation,stringToSearch)
@@ -223,7 +244,7 @@ class TalkAndResultUseCases @Inject constructor() {
                     contactList.keys.forEach {key->
                         if (key.contains(contactName)){
                             val number=contactList[key]
-                            println("possible $key $number")
+                         //   println("possible $key $number")
                             tmpNameAndNumberHmap.add(ContactsData(key,number.toString()))
                         }
                     }

@@ -15,39 +15,17 @@ class ContactList {
 
         return Observable.fromCallable {
             CheckOnlyPerrmission.check(context,Manifest.permission.READ_CONTACTS)
-        }.flatMap {
+        }.map {
             if (it){ //if permission granted , get contact list
-                getCurrentLocale(context.resources,context)
+                contactsList(context)
              }
              else { //if not granted return an empty hashMap object
-                Observable.just( HashMap())
+                HashMap()
              }
         }
     }
 
-    fun getCurrentLocale(resources:Resources,context: Context):Observable<HashMap<String,String>> {
-      return  Observable.fromCallable {
-            val CountryID = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                resources.configuration.locales.get(0).country
-            } else {
-                resources.configuration.locale.country
-            }
-
-            var countryZipCode = ""
-
-            val rl = resources.getStringArray(R.array.CountryCodes)
-            for (i in rl.indices) {
-                val g = rl[i].split(",").toTypedArray()
-                if (g[1].trim { it <= ' ' } == CountryID.trim()) {
-                    countryZipCode = g[0]
-                //    println("CountryZipCode $countryZipCode")
-                    break
-                }
-            }
-          countryZipCode
-        }.map {countryZipCode-> contactsList(context,countryZipCode) }
-    }
-    private fun contactsList(context: Context,countryCode:String):HashMap<String,String>{
+    private fun contactsList(context: Context):HashMap<String,String>{
         val hMap = HashMap<String, String>()
         val projection = arrayOf(
             ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
@@ -71,8 +49,6 @@ class ContactList {
                     number = cursor.getString(numberIndex)
                     name=name.replace("[^a-zא-ת ]".toRegex(),"")
                     number=number.replace("[^0-9]".toRegex(),"")
-                    if (!number.startsWith(countryCode))
-                         number=countryCode+number
                     hMap[name]=number
                     //   println("$name $number")
                 }

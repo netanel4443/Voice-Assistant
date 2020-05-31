@@ -18,9 +18,9 @@
 
     <string name="on_boarding_descrption">
      In order to open apps with voice operations ,first, you need to say the word <big><b>open</b></big>
-     and then the name of the app you want to open , for example : <big><b>open</b></big> Voice Assistant.
+     and then the name of the app you want to open , for example : <big><b>open</b></big> Calculator.
      If Voice Assistant could not open an app because of poor recognition,
-     you can add it by clicking the menu button and then click on the settings button.
+     you can add it by clicking the floating button on your screen and then, click on the settings button.
      </string>
     <string name="permission_required">A permission is required in order to do that operation.</string>
     <string name="settings">settings</string>
@@ -31,21 +31,48 @@
     <string name="important">important!!</string>
     <string name="add_app">Add app</string>
     <string name="how_to_use">User Manual</string>
+
     <string name="permission_ask_never_again">
     Enable at Settings>Apps>Voice Assistant>Permissions>
     </string>
+    <string name="floating_widget_permission">This permission is required in order to use this app.</string>
+
     <string name="click_to_talk_or_stop">Click in order to talk or stop</string>
 
     <string-array name="operations_explanation">
         <item>\u2022 Call Daniel</item>
         <item>\u2022 Search best movies of the year</item>
         <item>\u2022 Open calculator</item>
-    </string-array>
+        <item>\u2022 Spotify Eurovision Songs</item>
+        <item>\u2022 Youtube Eurovision Songs</item>
+        <!--    <item>\u2022 Navigate to [The desired address]</item> -->
+            <item>\u2022 WhatsApp Dad [record your message on next record]</item>
+            <item>\u2022 Text My best friend [record your message on next record]</item>
+        </string-array>
 
+        <string-array name="operations_keywords">
+            <item>Call</item>
+            <item>Search</item>
+            <item>Open</item>
+            <item>Spotify</item>
+            <item>Youtube</item>
+         <!--   <item>Navigate</item> -->
+        <item>WhatsApp</item>
+        <item>Text</item>
+    </string-array>
 
     <integer-array name="operations_images">
         <item>@drawable/ic_call_black_24dp</item>
         <item>@drawable/ic_search_black_24dp</item>
         <item>@drawable/ic_android_black_24dp</item>
-    </integer-array>
-</resources>
+        <item>@drawable/ic_music_note_black_24dp</item>
+        <item>@drawable/ic_music_note_black_24dp</item>
+        <!--    <item>@drawable/ic_navigate_black_24dp</item> -->
+            <item>@drawable/ic_message_black_24dp</item>
+            <item>@drawable/ic_message_black_24dp</item>
+        </integer-array>
+
+
+        <string name="record_in">Record a message in:</string>
+
+    </resources>

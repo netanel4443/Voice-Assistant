@@ -10,7 +10,7 @@ class OperationsKeyWordsAdapter: GenericRecyclerViewAdapter<String>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GenericViewHolder<String> {
         val inflater=LayoutInflater.from(parent.context)
-        val view=inflater.inflate(R.layout.possible_matches_recycler_design,parent,false)
+        val view=inflater.inflate(R.layout.operation_keyword_vh_design,parent,false)
         return OperationsWithoutImagesVH(view,items)
     }
 

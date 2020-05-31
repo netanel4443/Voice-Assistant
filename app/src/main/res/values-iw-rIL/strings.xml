@@ -16,7 +16,7 @@
         <big><b>open</b></big>
     <big>מחשבון</big>
 אם העוזר הקולי אינו יכול לפתוח אפליקציה בגלל זיהוי לקוי,
-        תוכל/י להוסיף אפליקציה זו על ידי לחיצה על כפתור התפריט ולאחר מכן על כפתור ההגדות.
+        תוכל/י להוסיף אפליקציה זו על ידי לחיצה על הכפתור הצף על המסך ולאחר מכן, על כפתור ההגדרות.
     </string>
 
     <string name="delete_app_description">
@@ -31,6 +31,8 @@
     </string>
 
     <string name="permission_required">יש צורך לתת הרשאה כדי לבצע פעולה זו.</string>
+    <string name="floating_widget_permission">הרשאה זו נדרשת על מנת להשתמש באפליקציה זו.</string>
+
     <string name="no_app_found">לא נמצאה אפליקציה , הינך יכול להוסיף אותה לרשימה.</string>
     <string name="settings">הגדרות</string>
     <string name="menu">תפריט</string>
@@ -56,8 +58,25 @@
             \u2022 פתח את מחשבון \n
              Open מחשבון \u2022
         </item>
+        <item>\u2022 ספוטיפיי , שירי האירוויזיון</item>
+        <item>\u2022 יוטיוב , שירי האירוויזיון</item>
+        <!--     <item>\u2022 נווט לתל אביב</item> -->
+             <item>\u2022 וואטסאפ לאבא [הקלט/י הודעה בהקלטה הבאה]</item>
+             <item>\u2022 הודעה לאבי הספר [הקלט/י הודעה בהקלטה הבאה]</item>
 
-    </string-array>
+         </string-array>
 
+         <string-array name="operations_keywords">
+             <item>תתקשר ל</item>
+             <item>חפש</item>
+             <item>פתח</item>
+             <item>ספוטיפיי</item>
+             <item>יוטיוב</item>
+             <!--  <item>נווט</item> -->
+          <item>וואטסאפ ל</item>
+          <item>הודעה ל</item>
+      </string-array>
 
-</resources>
+      <string name="record_in">הקלט הודעה בעוד:</string>
+
+  </resources>

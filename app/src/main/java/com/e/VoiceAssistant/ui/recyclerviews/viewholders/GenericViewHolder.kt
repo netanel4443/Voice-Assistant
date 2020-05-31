@@ -7,7 +7,6 @@ import com.e.VoiceAssistant.ui.recyclerviews.BindRecyclerViewHolder
 
 open class GenericViewHolder<T>(var view: View):RecyclerView.ViewHolder(view), BindRecyclerViewHolder {
 
-
    open var itemClick:((T)->Unit)?=null
 
    override fun bind(position: Int) {}

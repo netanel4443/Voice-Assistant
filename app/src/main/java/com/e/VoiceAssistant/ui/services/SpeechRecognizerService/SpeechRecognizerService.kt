@@ -24,14 +24,11 @@ import com.e.VoiceAssistant.ui.dialogs.FloatingRepresentOperationsDialog
 import com.e.VoiceAssistant.ui.onboarding.OnBoardingActivity
 import com.e.VoiceAssistant.ui.services.BaseService
 import com.e.VoiceAssistant.ui.services.SpeechRecognizerService.notifications.ForegroundNotification
-import com.e.VoiceAssistant.ui.splashScreen.LoadingSplashScreen
 import com.e.VoiceAssistant.ui.uiHelpers.TouchHelper
 import com.e.VoiceAssistant.ui.uiHelpers.touchListener.MultiTouchListener
 import com.e.VoiceAssistant.userscollectreddata.AppsDetailsSingleton
-import com.e.VoiceAssistant.utils.rxJavaUtils.throttle
 import com.e.VoiceAssistant.utils.toast
-import com.jakewharton.rxbinding.view.RxView
-import kotlinx.android.synthetic.main.floating_dark_screen.view.*
+import kotlinx.android.synthetic.main.floating_trash_screen.view.*
 import kotlinx.android.synthetic.main.floating_widget_layout.view.*
 import javax.inject.Inject
 
@@ -41,17 +38,12 @@ class SpeechRecognizerService : BaseService(), SpeechRecognizerServicePresenterS
     @Inject lateinit var sharedPrefs: SharedPreferences
     @Inject lateinit var appsDetailsSingleton: AppsDetailsSingleton
     private lateinit var floatingView: View
-    private lateinit var floatingDarkScreen: View
+    private lateinit var floatingTrashScreen: View
     private lateinit var windowManager: WindowManager
     private lateinit var params: WindowManager.LayoutParams
     private lateinit var darkScreenParams: WindowManager.LayoutParams
-    private lateinit var parenOfDarkImage: RelativeLayout
-    private lateinit var settings: Button
-    private lateinit var closeIcon: Button
-    private lateinit var help: Button
-    private lateinit var floatingRepresentOperationsDialog: FloatingRepresentOperationsDialog
-    private lateinit var darkImage : ImageView
-    private lateinit var menu : Button
+    private lateinit var parenOfTrashImage: RelativeLayout
+    private lateinit var trash : ImageView
     private lateinit var talkBtn : Button
     private val TAG = "SpeechRecognizerService"
 
@@ -77,44 +69,45 @@ class SpeechRecognizerService : BaseService(), SpeechRecognizerServicePresenterS
         initViews()
         initAppAndPackageList()
 
-        +RxView.clicks(settings).throttle().subscribe {
-            presenter.openSettingsActivity()
-        }
-
-        +RxView.clicks(menu).throttle().subscribe {
-            presenter.handleMenuClick(settings.visibility)
-        }
-
-        +RxView.clicks(help).throttle().subscribe {
-           floatingRepresentOperationsDialog.show()
-        }
-
-        +RxView.clicks(darkImage).subscribe {
-            presenter.handleMenuClick(settings.visibility)
-        }
-
-        closeIcon.setOnClickListener { stopSelf() }
-
         talkBtn.setOnTouchListener(MultiTouchListener{ handleTalkBtnTouchEvents(it) })
     }
 
     private fun handleTalkBtnTouchEvents(touchHelper: TouchHelper) {
         when (touchHelper) {
+            is TouchHelper.downEvent->
+                presenter.showOrDismissTrash(parenOfTrashImage.visibility)
             is TouchHelper.moveEvent -> {
                 params.x = touchHelper.xPos
                 params.y = touchHelper.yPos
                 windowManager.updateViewLayout(floatingView, params)
             }
+            is TouchHelper.upEvent->{
+               if (shouldDeleteView())
+                   stopSelf()
+                presenter.showOrDismissTrash(parenOfTrashImage.visibility)
+            }
             is TouchHelper.TalkOrStopClickEvent -> {
+                presenter.showOrDismissTrash(parenOfTrashImage.visibility)
                 val intent=Intent(this,TalkAndResultsActivity::class.java)
                 navigateToDesiredApp(intent)
             }
         }
     }
 
+    private fun shouldDeleteView(): Boolean {
+        val xWidth = trash.x + trash.width
+        val yWidth=trash.y+trash.height
+        val talkBtnHeight=talkBtn.height
+        val talkBtnWidth=talkBtn.width
+
+        return   params.y > (trash.y-(talkBtnHeight/2)) &&
+                 params.y < (yWidth+(talkBtnHeight/2)) &&
+                 params.x > (trash.x-(talkBtnWidth/2)) &&
+                 params.x < (xWidth+(talkBtnWidth/2))
+    }
+
     private fun firstInits() {
         presenter.bindView(this)
-        floatingRepresentOperationsDialog = FloatingRepresentOperationsDialog(this)
         shouldShowOnBoarding()
         ForegroundNotification().notification(this)
     }
@@ -123,25 +116,17 @@ class SpeechRecognizerService : BaseService(), SpeechRecognizerServicePresenterS
         val prefs = sharedPrefs.getBoolean("seen", false)
         if (!prefs) {
             val intent = Intent(this, OnBoardingActivity::class.java)
+
             navigateToDesiredApp(intent)
         }
     }
 
     private fun initViews() {
         floatingView = LayoutInflater.from(this).inflate(R.layout.floating_widget_layout, null)
-        floatingDarkScreen = LayoutInflater.from(this).inflate(R.layout.floating_dark_screen, null)
-        closeIcon = floatingView.closeServiceBtn
-        settings = floatingView.floatingSettingsButton
-        help = floatingView.floatingHelp
-        parenOfDarkImage = floatingDarkScreen.trashMainParent
-        darkImage = floatingDarkScreen.floatingDarkImage
-        menu = floatingView.floatingMenu
+        floatingTrashScreen = LayoutInflater.from(this).inflate(R.layout.floating_trash_screen, null)
+        parenOfTrashImage = floatingTrashScreen.trashMainParent
+        trash = floatingTrashScreen.floatingTrashImage
         talkBtn = floatingView.floatingTalkImg
-    }
-
-    private fun startLoginSplashScreen() {
-        val intent = Intent(this, LoadingSplashScreen::class.java)
-        navigateToDesiredApp(intent)
     }
 
     private fun closeLoginSplashScreen() {
@@ -149,8 +134,8 @@ class SpeechRecognizerService : BaseService(), SpeechRecognizerServicePresenterS
     }
 
     private fun initAppAndPackageList() {
-                presenter.initWindowManager()
-                floatingRepresentOperationsDialog.show()
+        presenter.initWindowManager()
+        FloatingRepresentOperationsDialog(this).show()
     }
 
     override fun initWindowManager(params: WindowManager.LayoutParams,
@@ -158,11 +143,11 @@ class SpeechRecognizerService : BaseService(), SpeechRecognizerServicePresenterS
         this.params = params
         darkScreenParams = trashParams
         windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
-        windowManager.addView(floatingDarkScreen, trashParams)
+        windowManager.addView(floatingTrashScreen, trashParams)
         windowManager.addView(floatingView, params)
     }
 
-    fun navigateToDesiredApp(intent: Intent){
+    private fun navigateToDesiredApp(intent: Intent){
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         try {
             startActivity(intent)
@@ -170,16 +155,14 @@ class SpeechRecognizerService : BaseService(), SpeechRecognizerServicePresenterS
             toast(R.string.no_app_found)
         }
     }
+
     override fun openSettingsActivity() {
         val intent = Intent(this, AddCustomAppNameActivity::class.java)
         navigateToDesiredApp(intent)
     }
 
-    override fun handleMenuClick(visibility: Int) {
-        settings.visibility = visibility
-        closeIcon.visibility = visibility
-        help.visibility = visibility
-        parenOfDarkImage.visibility = visibility
+    override fun showOrDismissTrash(visibility: Int) {
+        parenOfTrashImage.visibility = visibility
     }
 
     override fun onDestroy() {
@@ -188,6 +171,6 @@ class SpeechRecognizerService : BaseService(), SpeechRecognizerServicePresenterS
         nm.cancel(1)
         presenter.dispose()
         windowManager.removeView(floatingView)
-        windowManager.removeView(floatingDarkScreen)
+        windowManager.removeView(floatingTrashScreen)
     }
 }

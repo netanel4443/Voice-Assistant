@@ -17,8 +17,8 @@ android {
         minSdkVersion 21
         targetSdkVersion 29
         multiDexEnabled = true
-        versionCode 3
-        versionName "1.1"
+        versionCode 6
+        versionName "1.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -62,23 +62,21 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
     implementation "androidx.lifecycle:lifecycle-reactivestreams:2.2.0"
     annotationProcessor "android.arch.lifecycle:compiler:2.1.0"
-    //circle imageview
-    implementation 'de.hdodenhof:circleimageview:3.0.1'
     //DynamicUtils
     implementation 'com.pranavpandey.android:dynamic-utils:2.3.0'
-    //crop image
-    implementation 'com.theartofdev.edmodo:android-image-cropper:2.8.0'
+   //material
     implementation 'com.google.android.material:material:1.1.0'
     //Admob
     implementation 'com.google.android.gms:play-services-ads:19.1.0'
-    //layoutmanager
-    implementation 'rouchuan.viewpagerlayoutmanager:viewpagerlayoutmanager:2.0.22'
     //memory leaks detection
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.0-alpha-3'
+     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.0-alpha-3'
     //dagger2
     implementation "com.google.dagger:dagger:2.27"
     implementation "com.google.dagger:dagger-android:2.27"
     implementation "com.google.dagger:dagger-android-support:2.27"
     kapt "com.google.dagger:dagger-android-processor:2.26"
     kapt "com.google.dagger:dagger-compiler:2.26"
+   //rxjava 3
+  //  implementation 'io.reactivex.rxjava3:rxjava:3.0.0'
+
 }

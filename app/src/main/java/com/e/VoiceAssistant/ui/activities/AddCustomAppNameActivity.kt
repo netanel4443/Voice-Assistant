@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.speech.SpeechRecognizer
+import android.speech.tts.TextToSpeech
 import android.view.View
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -28,7 +29,7 @@ import com.e.VoiceAssistant.utils.rxJavaUtils.throttle
 import com.e.VoiceAssistant.viewmodels.AddCustomAppNameViewModel
 import com.e.VoiceAssistant.viewmodels.states.AddCustomAppNameStates
 import com.jakewharton.rxbinding.view.RxView
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_add_custom_app_name.*
 import javax.inject.Inject
 
 class AddCustomAppNameActivity : BaseActivity() {
@@ -45,7 +46,7 @@ class AddCustomAppNameActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_add_custom_app_name)
 
         supportActionBar?.hide()
 
@@ -62,7 +63,7 @@ class AddCustomAppNameActivity : BaseActivity() {
                     newAppNameSettignsActivity.text=state.appName
                     selectedApp.newName=state.appName
                 }
-                is AddCustomAppNameStates.ApplySelectedApp->SetSelectedApp(state.appsDetails)
+                is AddCustomAppNameStates.ApplySelectedApp->setSelectedApp(state.appsDetails)
                 is AddCustomAppNameStates.GetCachedData->setCachedSettings(state.appDetailsHmap,state.selectedApp,state.speechResultAppName)
                 is AddCustomAppNameStates.AddItemToAppList-> addItemToServiceAppList(state.name,state.activityName,state.pckg,state.icon,state.realName)
                 is AddCustomAppNameStates.RemoveItemFromAppList->removeItemfromServiceAppList(state.name)
@@ -156,7 +157,7 @@ class AddCustomAppNameActivity : BaseActivity() {
         initUI(appDetailsHmap)
     }
 
-    private fun SetSelectedApp(appDetails: AppsDetails) {
+    private fun setSelectedApp(appDetails: AppsDetails) {
         selectedApp.realName=appDetails.realName
         selectedApp.activity=appDetails.activity
         selectedApp.pckg=appDetails.pckg
@@ -218,9 +219,9 @@ class AddCustomAppNameActivity : BaseActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (adView!=null){
-            adView.removeAllViews()
-            adView.destroy()
+        adView?.run {
+          removeAllViews()
+          destroy()
         }
         viewModel.resetState()
         talkIntent.destroy()
