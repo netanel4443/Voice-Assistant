@@ -17,9 +17,13 @@ class HandleSpeechRecognition(private val view:CommandsForSpeechListenerService)
 
     override fun onEvent(eventType: Int, params: Bundle?) {}
 
-    override fun onBeginningOfSpeech() {}
+    override fun onBeginningOfSpeech() {
+        println("onBeginningOfSpeech")
+    }
 
-    override fun onEndOfSpeech() {}
+    override fun onEndOfSpeech() {
+        println("onEndOfSpeech")
+    }
 
     override fun onError(error: Int) {
         val message: String = when (error) {
@@ -34,7 +38,7 @@ class HandleSpeechRecognition(private val view:CommandsForSpeechListenerService)
             SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> ""
             else -> "Didn't understand, please try again."
         }
-        printMessage("error",message)
+      //  printMessage("error",message)
 
         if (message!="ERROR_RECOGNIZER_BUSY") {
             view.changeTalkIcon()
@@ -43,9 +47,9 @@ class HandleSpeechRecognition(private val view:CommandsForSpeechListenerService)
 
     override fun onResults(results: Bundle?) {
         val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)!!
-            matches.forEach{
-            println("matches $it")
-        }
+          matches.forEach{
+           println("matches $it")
+          }
         view.changeTalkIcon()
         view.checkForResults(matches)
     }

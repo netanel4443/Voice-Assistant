@@ -15,7 +15,6 @@ abstract class ViewModelsModule {
 
     @Binds
     @IntoMap
-    @ActivityScope
     @ViewModelKey(AddCustomAppNameViewModel::class)
     abstract fun bindSpeechRecognitionViewModel(addCustomAppNameViewModel: AddCustomAppNameViewModel):ViewModel
 

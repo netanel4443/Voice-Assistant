@@ -6,23 +6,15 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.lifecycle.Observer
 import com.e.VoiceAssistant.R
 import com.e.VoiceAssistant.data.AppsDetails
-import com.e.VoiceAssistant.data.DeviceAppsDetails
-import com.e.VoiceAssistant.permissions.RequestCodes
-import com.e.VoiceAssistant.permissions.RequestGlobalPermission
 import com.e.VoiceAssistant.ui.activities.BaseActivity
 import com.e.VoiceAssistant.ui.services.SpeechRecognizerService.SpeechRecognizerService
 import com.e.VoiceAssistant.userscollectreddata.AppsDetailsSingleton
-import com.e.VoiceAssistant.utils.rxJavaUtils.subscribeOnIoAndObserveOnMain
 import com.e.VoiceAssistant.utils.toastLong
-import com.e.VoiceAssistant.viewmodels.AddCustomAppNameViewModel
 import com.e.VoiceAssistant.viewmodels.LoadDataViewModel
 import com.e.VoiceAssistant.viewmodels.commands.LoadDataCommands
-import com.e.VoiceAssistant.viewmodels.states.AddCustomAppNameStates
 import com.tbruyelle.rxpermissions2.RxPermissions
 import javax.inject.Inject
 
@@ -34,22 +26,42 @@ class LoadDataSplashActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        initAppsDetails()
-        setLiveDataObserver()
+//        /*we check this because the user can click on the app again an the data will be reload*/
+//        if (appsDetailsSingleton.countryLocaleDigits.isEmpty()) {
+            setRxObserver()
+            viewModel.getData(this.packageManager,this.resources)
+//        } else{
+//            finish()
+//        }
     }
 
-    private fun setLiveDataObserver() {
-        viewModel.commands.observe(this, Observer{state->
-            when(state){
-                is LoadDataCommands.StoredAppsDetails->addSavedAppsFromMemoryToList(state.list)
+    private fun setRxObserver() {
+        +viewModel.commands.subscribe { commands->
+            when(commands){
+                is LoadDataCommands.GetDeviceApps-> initAppsDetails(commands.list)
+                is LoadDataCommands.StoredAppsDetails-> addSavedAppsFromMemoryToList(commands.list)
+                is LoadDataCommands.GetCurrentLocaleDigits-> getLocaleDigits(commands.digits)
+                is LoadDataCommands.LoadComplete-> onLoadDataComplete()
             }
-        })
+        }
+    }
+
+    private fun getLocaleDigits(digits: String) {
+        appsDetailsSingleton.countryLocaleDigits=digits
+    }
+
+    private fun initAppsDetails(apps: HashMap<String, AppsDetails>) {
+        appsDetailsSingleton.appsDetailsHmap.putAll(apps)
+        appsDetailsSingleton.appsAndStoredAppsDetails.putAll(apps)
     }
 
     private fun addSavedAppsFromMemoryToList(list:HashMap<String, AppsDetails>) {
-          appsDetailsSingleton.storedAppsDetailsFromDB.putAll(list)
-          appsDetailsSingleton.appsAndStoredAppsDetails.putAll(list)
-          startSpeechRecognizerService()
+        appsDetailsSingleton.storedAppsDetailsFromDB.putAll(list)
+        appsDetailsSingleton.appsAndStoredAppsDetails.putAll(list)
+    }
+
+    private fun onLoadDataComplete(){
+        startSpeechRecognizerService()
     }
 
     private fun startSpeechRecognizerService(){
@@ -60,22 +72,10 @@ class LoadDataSplashActivity : BaseActivity() {
         }
         else {
             runtimePermissionForUser()
-            Toast.makeText(this, "System Alert Window Permission Is Required For Floating Widget.", Toast.LENGTH_LONG).show();
+            toastLong(R.string.floating_widget_permission)
         }
     }
 
-
-    private fun initAppsDetails() {
-
-        +DeviceAppsDetails().getAppsDetails(this)
-            .subscribeOnIoAndObserveOnMain()
-            .subscribe(
-                {
-                    appsDetailsSingleton.appsDetailsHmap.putAll(it)
-                    appsDetailsSingleton.appsAndStoredAppsDetails.putAll(it)
-                    viewModel.getStoredAppsDetails(it)
-                }, {   it.printStackTrace() })
-    }
 
 
    private fun checkRxPermissions(){
@@ -84,7 +84,6 @@ class LoadDataSplashActivity : BaseActivity() {
        val recordAudioObservable=
            rxPermissions.requestEach(permission.RECORD_AUDIO)
             .doOnNext {
-             //   println("numbers")
                  when {
                     it.granted -> {
                          startServiceAndFinishActivity()
@@ -122,7 +121,7 @@ class LoadDataSplashActivity : BaseActivity() {
             Uri.parse("package:$packageName")
         )
         startActivityForResult(permissionIntent, 1)
-       finishAndRemoveTask()
+        finish()
    }
 
     override fun onDestroy() {

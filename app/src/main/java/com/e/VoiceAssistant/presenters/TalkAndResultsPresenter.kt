@@ -71,7 +71,6 @@ class TalkAndResultsPresenter@Inject constructor(
     fun checkIfSecondListenRequired(matches: ArrayList<String>,
                                     appComponent: HashMap<String, AppsDetails>,
                                     contactList: HashMap<String,String> ){
-        //todo add cancel option to sms and whatsapp
         if (operation=="הודעה"||operation=="text") {
            handleSecondListen(matches[0],::handleSecondListenForSms)
         }
@@ -85,11 +84,12 @@ class TalkAndResultsPresenter@Inject constructor(
 
     private fun handleSecondListen(match:String, handleFunc:()->Unit){
         val tmpIntent=lastOperationIntent
-        lastOperationIntent=Intent() //reset !
-        operation="" //reset!
+        tmpIntent.flags=Intent.FLAG_ACTIVITY_NEW_TASK //required new task or will replace our activity
         message=match //keep the message if the user wants to change contact
         handleFunc()
         view.navigateToDesiredApp(tmpIntent)
+        lastOperationIntent=Intent() //reset !
+        operation="" //reset !
     }
 
     private fun handleSecondListenForWhatsApp(){
@@ -103,64 +103,73 @@ class TalkAndResultsPresenter@Inject constructor(
         lastOperationIntent.putExtra(Intent.EXTRA_TEXT, message)
     }
 
-    fun returnRequiredOperationIntent(
+    private fun returnRequiredOperationIntent(
         matches: ArrayList<String>,
         appComponent: HashMap<String, AppsDetails>,
         contactList: HashMap<String,String> ){
 
         +useCases.returnRequiredOperationIntent(matches)
             .subscribe( {
-                println("operation ${it.first}")
-                operationOfReplacedResult=it.first
-                operation=it.first
+             //   println("operation ${it.first}")
+                operationOfReplacedResult=it.first //keep if second listen is needed
+                operation=it.first //keep if second listen is needed
                 checkRequestedOperation(it.first,appComponent,contactList,matches,it.second)
-            },{it.printStackTrace()})
+            },{it.printStackTrace()
+            })
     }
 
     private fun requiredOperationIsWhatsApp(matches: ArrayList<String>, requiredOpration: String, contactList: HashMap<String, String>){
         +useCases.sendWhatsApp(matches,requiredOpration,contactList)
             .subscribeOnIoAndObserveOnMain()
-            .subscribe({pair->checkIntentType(pair.first,pair.second as HashSet<ResultsData>)},{})
+            .subscribe({pair->checkIntentType(pair.first,pair.second as HashSet<ResultsData>)},{
+                it.printStackTrace()
+            })
     }
 
     private fun requiredOperationIsSendSms(matches: ArrayList<String>, requiredOpration: String, contactList: HashMap<String, String>){
         +useCases.sendSms(matches,requiredOpration,contactList)
             .subscribeOnIoAndObserveOnMain()
-            .subscribe({ pair->checkIntentType(pair.first,pair.second as HashSet<ResultsData>) }, {})
+            .subscribe({ pair->checkIntentType(pair.first,pair.second as HashSet<ResultsData>) }, {
+                it.printStackTrace()
+            })
     }
 
     private fun requiredOperationIsCallTo(matches: ArrayList<String>, requiredOpration: String, contactList: HashMap<String, String>){
         +useCases.callTo(matches,requiredOpration,contactList)
             .subscribeOnIoAndObserveOnMain()
-            .subscribe({pair->view.navigateToDesiredApp(pair.first,pair.second as HashSet<ResultsData>,0)},{it.printStackTrace()})
+            .subscribe({pair->view.navigateToDesiredApp(pair.first,pair.second as HashSet<ResultsData>,0)},{
+                it.printStackTrace()
+            })
     }
 
     private fun requiredOperationIsSearchInYoutube(matches: ArrayList<String>,requiredOpration: String){
         +useCases.searchInYoutube(matches,requiredOpration)
             .subscribeOnIoAndObserveOnMain()
-            .subscribe({ view.navigateToDesiredApp(it.first,it.second as HashSet<ResultsData>,1)},{})
+            .subscribe({ view.showResults(it.second as HashSet<ResultsData>,1)},{
+                it.printStackTrace()
+            })
     }
     private fun requiredOperationIsSearchInSpotify(appComponent: HashMap<String, AppsDetails>, matches: ArrayList<String>, requiredOpration: String){
         +useCases.searchInSpotify(appComponent, matches,requiredOpration)
             .subscribeOnIoAndObserveOnMain()
-            .subscribe({ view.navigateToDesiredApp(it.first,it.second as HashSet<ResultsData>,1)},{})
+            .subscribe({ view.showResults(it.second as HashSet<ResultsData>,1)},{it.printStackTrace()})
     }
 
     private fun requiredOperationIsSearchInWeb(matches: ArrayList<String>, requiredOpration: String){
         +useCases.searchInWeb(matches,requiredOpration)
             .subscribeOnIoAndObserveOnMain()
-            .subscribe({ view.navigateToDesiredApp(it.first,it.second as HashSet<ResultsData>,1)},{})
+            .subscribe({ view.showResults(it.second as HashSet<ResultsData>,1)},{it.printStackTrace()})
     }
     private fun requiredOperationIsNavigate(requiredOpration: String,matches: ArrayList<String>){
         +useCases.navigateTo(requiredOpration, matches)
             .subscribeOnIoAndObserveOnMain()
-            .subscribe({view.navigateToDesiredApp(it.first,it.second as HashSet<ResultsData>,1)},{})
+            .subscribe({view.navigateToDesiredApp(it.first,it.second as HashSet<ResultsData>,1)},{it.printStackTrace()})
     }
 
     private fun requiredOperationIsOpenAnApp(appComponent: HashMap<String, AppsDetails>, splitedResultsLset:LinkedHashSet<String>){
         +OpenDesiredAppPresenterUseCase().getDesiredIntent(appComponent,splitedResultsLset)
             .subscribeOnIoAndObserveOnMain()
-            .subscribe({ intent->view.navigateToDesiredApp(intent,HashSet(),1) },{})
+            .subscribe({ intent->view.navigateToDesiredApp(intent,HashSet(),1) },{it.printStackTrace()})
     }
 
     private fun checkRequestedOperation(
@@ -199,11 +208,13 @@ class TalkAndResultsPresenter@Inject constructor(
                              appComponent: HashMap<String, AppsDetails>){
         +useCases.changeSelectedResult(operationOfReplacedResult,resultsData,appComponent,message)
             .subscribeOnIoAndObserveOnMain()
-            .subscribe({intent->view.navigateToDesiredApp(intent)},{it.printStackTrace() })
+            .subscribe({intent->view.navigateToDesiredApp(intent)},{
+                it.printStackTrace()
+            })
     }
 
     private fun checkIntentType( intent: Intent,contacts:HashSet<ResultsData>){
-        println("intent ${intent.data}")
+      //  println("intent ${intent.data}")
         lastOperationIntent=intent
         view.secondListenToUser(contacts,0,intent)
     }

@@ -60,26 +60,6 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/onBoardingSettingsImgView"/>
-   <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/onBoardingMenuImgView"
-        android:background="@drawable/ic_menu_horiz_black_24dp"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/onBoardingSettingsTview"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginTop="20dp"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/onBoardingMenuTview"
-            android:textSize="15sp"
-            android:text="@string/menu"
-            android:fontFamily="@font/davidlibre"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/onBoardingMenuImgView"/>
-
         <CheckBox
             android:id="@+id/onBoardingCheckBox"
             android:layout_width="wrap_content"
@@ -88,7 +68,7 @@
             android:fontFamily="@font/davidlibre"
             app:layout_constraintLeft_toLeftOf="parent"
             android:layout_margin="15dp"
-            app:layout_constraintTop_toBottomOf="@+id/onBoardingMenuTview"/>
+            app:layout_constraintTop_toBottomOf="@+id/onBoardingSettingsTview"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -98,7 +78,7 @@
             android:textSize="20sp"
             android:fontFamily="@font/davidlibre"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/onBoardingMenuTview"
+            app:layout_constraintTop_toBottomOf="@+id/onBoardingSettingsTview"
             android:layout_margin="15dp"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

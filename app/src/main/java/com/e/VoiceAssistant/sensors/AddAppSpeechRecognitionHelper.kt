@@ -8,9 +8,6 @@ import android.speech.SpeechRecognizer
 class AddAppSpeechRecognitionHelper(
     val action:(SpeechStates,String)->Unit ):RecognitionListener {
 
-
-
-
     override fun onReadyForSpeech(params: Bundle?) {}
 
     override fun onRmsChanged(rmsdB: Float) {}

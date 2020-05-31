@@ -2,12 +2,16 @@ package com.e.VoiceAssistant.ui.activities
 
 import android.Manifest
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.media.AudioManager
 import android.os.Bundle
 import android.speech.SpeechRecognizer
+import android.speech.tts.TextToSpeech
 import android.view.View
 import android.view.animation.AnimationUtils
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.e.VoiceAssistant.R
@@ -18,14 +22,18 @@ import com.e.VoiceAssistant.presenters.TalkAndResultsPresenter
 import com.e.VoiceAssistant.presenters.presentersStates.TalkAndResultsPresenterView
 import com.e.VoiceAssistant.sensors.CommandsForSpeechListenerService
 import com.e.VoiceAssistant.sensors.HandleSpeechRecognition
+import com.e.VoiceAssistant.ui.ads.Adrequest
+import com.e.VoiceAssistant.ui.dialogs.FloatingRepresentOperationsDialog
 import com.e.VoiceAssistant.ui.recyclerviews.datahelpers.ResultsData
 import com.e.VoiceAssistant.ui.recyclerviews.recyclerviewsadapters.OperationsKeyWordsAdapter
 import com.e.VoiceAssistant.ui.recyclerviews.recyclerviewsadapters.PossibleResultsRecyclerViewAdapter
 import com.e.VoiceAssistant.usecases.ContactList
 import com.e.VoiceAssistant.userscollectreddata.AppsDetailsSingleton
 import com.e.VoiceAssistant.utils.rxJavaUtils.subscribeOnIoAndObserveOnMain
+import com.e.VoiceAssistant.utils.rxJavaUtils.throttle
 import com.e.VoiceAssistant.utils.toast
 import com.e.VoiceAssistant.utils.toastLong
+import com.jakewharton.rxbinding.view.RxView
 import dagger.android.support.DaggerAppCompatActivity
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
@@ -34,8 +42,10 @@ import kotlinx.android.synthetic.main.activity_talk_and_results.*
 import rx.Subscription
 import rx.subscriptions.CompositeSubscription
 import java.util.*
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.collections.HashMap
+
 
 class TalkAndResultsActivity : DaggerAppCompatActivity() , TalkAndResultsPresenterView {
 
@@ -58,16 +68,28 @@ class TalkAndResultsActivity : DaggerAppCompatActivity() , TalkAndResultsPresent
         firstInits()
         initContactListAndSpeechRecognition ()
 
-        clickToTalkOrStopBtn . setOnClickListener {
+        clickToTalkOrStopBtn.setOnClickListener {
             presenter.handleTalkOrStopClick()
         }
+
+        +RxView.clicks(settings).throttle().subscribe {
+            val intent = Intent(this, AddCustomAppNameActivity::class.java)
+            startActivity(intent)
+            //  navigateToDesiredApp(intent)
+        }
+
+        +RxView.clicks(floatingHelp).throttle().subscribe {
+            FloatingRepresentOperationsDialog(this).show()
+        }
     }
+
 
     private fun firstInits() {
         presenter.bindView(this)
         appsDetailsHmap=appsDetailsSingleton.appsAndStoredAppsDetails
         initRecyclerView()
         initOperationsRecyclerView()
+        talk_and_result_activity_adView.loadAd(Adrequest().request())
     }
 
     private fun initOperationsRecyclerView() {
@@ -75,7 +97,7 @@ class TalkAndResultsActivity : DaggerAppCompatActivity() , TalkAndResultsPresent
         operationsWordsRecyclerView.adapter=operationAdapter
         operationsWordsRecyclerView.layoutManager=LinearLayoutManager(this,RecyclerView.HORIZONTAL,false)
         operationsWordsRecyclerView.setHasFixedSize(true)
-        operationAdapter.attachData(resources.getStringArray(R.array.operations_explanation).toHashSet())
+        operationAdapter.attachData(resources.getStringArray(R.array.operations_keywords).toHashSet())
     }
 
     private fun initRecyclerView() {
@@ -97,11 +119,13 @@ class TalkAndResultsActivity : DaggerAppCompatActivity() , TalkAndResultsPresent
 
         +Observable.combineLatest(observableList) {}
             .subscribeOnIoAndObserveOnMain()
-            .doOnComplete {//should happen on mainThread after inits are completed
+            .doOnComplete {
+                /*according to docs this should be initialized on mainThread after inits are completed*/
                 initSpeechRecognizer()
             }
             .subscribe({}, {})
     }
+
 
     private fun setContactList(list: HashMap<String, String>) {
         concatList = list
@@ -124,7 +148,10 @@ class TalkAndResultsActivity : DaggerAppCompatActivity() , TalkAndResultsPresent
             override fun checkForResults(matches:ArrayList<String>) {
                 presenter.checkIfSecondListenRequired(matches,appsDetailsHmap,concatList)
             }
-        })
+
+            override fun relisten() {
+            }
+            })
         )
     }
 
@@ -135,6 +162,11 @@ class TalkAndResultsActivity : DaggerAppCompatActivity() , TalkAndResultsPresent
                 presenter.changeTalkBtnIcon()
             } else {
                 talkIntent.stopListening()
+                /*timer added to cancel because the api sometimes stuck at "Busy state" and we can't
+                *perform a new operation*/
+                +Observable.timer(500,TimeUnit.MILLISECONDS)
+                    .subscribeOnIoAndObserveOnMain()
+                    .subscribe{talkIntent.cancel() }
                 presenter.changeTalkBtnIcon()
             }
         }
@@ -145,9 +177,10 @@ class TalkAndResultsActivity : DaggerAppCompatActivity() , TalkAndResultsPresent
     }
 
     override fun navigateToDesiredApp(intent: Intent, results: HashSet<ResultsData>,dataType: Int) {
-    //    println("send sms? ${intent.action}")
+        println("intent ${intent.data}")
         if (checkIfPermissionRequired(intent))
         {
+
             try {
                 startActivity(intent)
                 adapter.attachData(results,dataType,intent)
@@ -162,8 +195,6 @@ class TalkAndResultsActivity : DaggerAppCompatActivity() , TalkAndResultsPresent
 
     override fun navigateToDesiredApp(intent: Intent) {
         if (checkIfPermissionRequired(intent)) {
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or
-                    Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
             try {
                 startActivity(intent)
             }
@@ -176,7 +207,11 @@ class TalkAndResultsActivity : DaggerAppCompatActivity() , TalkAndResultsPresent
         }
     }
 
-    override fun secondListenToUser(contacts:HashSet<ResultsData>,dataType: Int,intent: Intent) {
+    override fun showResults(results: HashSet<ResultsData>, dataType: Int) {
+        adapter.attachData(results,dataType)
+    }
+
+    override fun secondListenToUser(contacts:HashSet<ResultsData>, dataType: Int, intent: Intent) {
         /** timer is needed because of throttle click(rxBinding) .
            After a user clicks on the [talk] button when he wants to pause the speech recognition*/
         adapter.attachData(contacts,0,intent)
@@ -192,7 +227,7 @@ class TalkAndResultsActivity : DaggerAppCompatActivity() , TalkAndResultsPresent
         counterTalkAndResultParent.visibility= View.VISIBLE
         val fadeOut=   AnimationUtils.loadAnimation(this, R.anim.fade_out)
         counterTalkAndResult.startAnimation(fadeOut)
-        counterTalkAndResult.text=counter.toString()
+        counterTalkAndResult.text=getString(R.string.record_in) +" " + "$counter"
     }
 
     private fun checkIfPermissionRequired(intent: Intent):Boolean {
@@ -206,11 +241,26 @@ class TalkAndResultsActivity : DaggerAppCompatActivity() , TalkAndResultsPresent
         val intent = Intent(this, AddCustomAppNameActivity::class.java)
         startActivity(intent)
     }
+    override fun onResume() {
+        super.onResume()
+        talk_and_result_activity_adView.resume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        talk_and_result_activity_adView.pause()
+    }
 
     override fun onDestroy() {
         super.onDestroy()
+        talk_and_result_activity_adView?.apply{
+            removeAllViews()
+            destroy()
+        }
         presenter.dispose()
         talkIntent.destroy()
+        compositeDisposable.clear()
+        compositeSubscription.clear()
     }
 
     private inline operator fun<reified T : Subscription> T.unaryPlus() =
@@ -218,5 +268,6 @@ class TalkAndResultsActivity : DaggerAppCompatActivity() , TalkAndResultsPresent
 
     private inline operator fun<reified T : Disposable> T.unaryPlus() =
         compositeDisposable.add(this)
-
 }
+
+

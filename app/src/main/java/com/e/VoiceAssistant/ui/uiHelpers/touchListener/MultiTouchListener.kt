@@ -68,6 +68,7 @@ class MultiTouchListener(val action:(TouchHelper)->Unit) : OnTouchListener {
               //  trash.visibility = View.VISIBLE//show trash icon
                 // Save the ID of this pointer.
                 mActivePointerId = event.getPointerId(0)
+                action(TouchHelper.downEvent)
             }
             MotionEvent.ACTION_MOVE -> {
 

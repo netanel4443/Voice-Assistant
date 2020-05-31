@@ -30,11 +30,11 @@ class SpeechRecognizerServicePresenter @Inject constructor(
     }
 
 
-    fun handleMenuClick(visibility: Int) {
+    fun showOrDismissTrash(visibility: Int) {
         if (visibility==View.GONE)
-            view.handleMenuClick(View.VISIBLE)
+            view.showOrDismissTrash(View.VISIBLE)
         else
-            view.handleMenuClick(View.GONE)
+            view.showOrDismissTrash(View.GONE)
     }
 
     private operator fun Disposable.unaryPlus(){

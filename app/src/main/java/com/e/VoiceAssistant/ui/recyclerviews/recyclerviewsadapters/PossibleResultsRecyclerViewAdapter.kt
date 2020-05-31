@@ -25,6 +25,13 @@ class PossibleResultsRecyclerViewAdapter():RecyclerView.Adapter<BaseViewHolder>(
         notifyDataSetChanged()
    }
 
+    fun attachData(data:HashSet<ResultsData>,type:Int){
+        dataType=type
+        items.clear()
+        items.addAll(data)
+        notifyDataSetChanged()
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
         val inflater=LayoutInflater.from(parent.context)
         val view: View

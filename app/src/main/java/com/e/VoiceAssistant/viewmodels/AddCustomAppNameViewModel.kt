@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import com.e.VoiceAssistant.R
 import com.e.VoiceAssistant.data.SavedAppsDetails
 import com.e.VoiceAssistant.data.AppsDetails
+import com.e.VoiceAssistant.di.annotations.ActivityScope
 import com.e.VoiceAssistant.usecases.SpeechRecognitionUseCases
 import com.e.VoiceAssistant.utils.rxJavaUtils.subscribeOnIoAndObserveOnMain
 import com.e.VoiceAssistant.utils.rxJavaUtils.throttle
@@ -18,6 +19,7 @@ import javax.inject.Inject
 import kotlin.collections.HashMap
 import kotlin.collections.LinkedHashMap
 
+@ActivityScope
 class AddCustomAppNameViewModel @Inject constructor(
     private val  useCases: SpeechRecognitionUseCases
 ): BaseViewModel() {
