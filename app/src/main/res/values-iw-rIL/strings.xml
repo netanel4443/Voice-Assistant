@@ -73,9 +73,11 @@
              <item>ספוטיפיי</item>
              <item>יוטיוב</item>
              <!--  <item>נווט</item> -->
-          <item>וואטסאפ ל</item>
-          <item>הודעה ל</item>
-      </string-array>
+              <item>וואטסאפ ל</item>
+              <item>הודעה ל</item>
+              <item>השתק</item>
+              <item>צליל</item>
+         </string-array>
 
       <string name="record_in">הקלט הודעה בעוד:</string>
 

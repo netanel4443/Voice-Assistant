@@ -5,11 +5,10 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.e.VoiceAssistant.ui.recyclerviews.BindRecyclerViewHolder
 
-open class GenericViewHolder<T>(var view: View):RecyclerView.ViewHolder(view), BindRecyclerViewHolder {
+open class GenericViewHolderHashMap<K,V>(var view: View):RecyclerView.ViewHolder(view) {
 
-    open var itemClick:((T)->Unit)?=null
+    open var itemClick:((K,V)->Unit)?=null
 
-    override fun bind(position: Int) {}
-
+    open fun bind(itemKey: K,itemValue:V) {}
 
 }

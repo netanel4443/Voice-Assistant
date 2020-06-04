@@ -11,7 +11,7 @@ import com.e.VoiceAssistant.R
 import com.e.VoiceAssistant.data.AppsDetails
 import com.e.VoiceAssistant.ui.activities.BaseActivity
 import com.e.VoiceAssistant.ui.services.SpeechRecognizerService.SpeechRecognizerService
-import com.e.VoiceAssistant.userscollectreddata.AppsDetailsSingleton
+import com.e.VoiceAssistant.userscollecteddata.AppsDetailsSingleton
 import com.e.VoiceAssistant.utils.toastLong
 import com.e.VoiceAssistant.viewmodels.LoadDataViewModel
 import com.e.VoiceAssistant.viewmodels.commands.LoadDataCommands
@@ -26,7 +26,7 @@ class LoadDataSplashActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-//        /*we check this because the user can click on the app again an the data will be reload*/
+         /*we check this because the user can click on the app again an the data will be reload*/
 //        if (appsDetailsSingleton.countryLocaleDigits.isEmpty()) {
             setRxObserver()
             viewModel.getData(this.packageManager,this.resources)
@@ -75,8 +75,6 @@ class LoadDataSplashActivity : BaseActivity() {
             toastLong(R.string.floating_widget_permission)
         }
     }
-
-
 
    private fun checkRxPermissions(){
         val rxPermissions=RxPermissions(this)

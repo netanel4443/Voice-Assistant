@@ -4,9 +4,12 @@ import android.content.ComponentName
 import android.content.Intent
 import com.e.VoiceAssistant.data.AppsDetails
 import com.e.VoiceAssistant.data.ComponentObject
+import com.e.VoiceAssistant.di.annotations.ActivityScope
 import io.reactivex.Observable
+import javax.inject.Inject
 
-class OpenDesiredAppPresenterUseCase {
+@ActivityScope
+class OpenDesiredAppPresenterUseCase @Inject constructor(){
 
     fun getDesiredIntent(appComponent:HashMap<String, AppsDetails>,
                          splitedResultsLhset:LinkedHashSet<String>  ): Observable<Intent> {
@@ -59,6 +62,7 @@ class OpenDesiredAppPresenterUseCase {
                intent= Intent(Intent.ACTION_MAIN)
                intent.addCategory(Intent.CATEGORY_LAUNCHER)
                intent.component =component
+               intent.flags=Intent.FLAG_ACTIVITY_NEW_TASK
                intent
             }
 

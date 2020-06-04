@@ -10,6 +10,17 @@ import com.e.VoiceAssistant.ui.recyclerviews.datahelpers.ResultsData
 import com.e.VoiceAssistant.ui.recyclerviews.viewholders.BaseViewHolder
 import com.e.VoiceAssistant.ui.recyclerviews.viewholders.PossibleContactsResultsViewHolder
 import com.e.VoiceAssistant.ui.recyclerviews.viewholders.PossibleMatchesViewHolder
+import com.e.VoiceAssistant.utils.printIfDebug
+import com.e.VoiceAssistant.utils.rxJavaUtils.throttle
+import com.jakewharton.rxbinding3.view.clicks
+import io.reactivex.Observable
+import io.reactivex.Single
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.plusAssign
+import java.util.*
+import kotlin.collections.HashMap
+import kotlin.collections.HashSet
 
 class PossibleResultsRecyclerViewAdapter():RecyclerView.Adapter<BaseViewHolder>() {
    private var items= HashSet<ResultsData>()
@@ -17,12 +28,9 @@ class PossibleResultsRecyclerViewAdapter():RecyclerView.Adapter<BaseViewHolder>(
    private var intent:Intent=Intent()
    var itemClick:((ResultsData)->Unit)?=null
 
-   fun attachData(data:HashSet<ResultsData>,type:Int,intent: Intent){
+    fun attachData(data:HashSet<ResultsData>,type:Int,intent: Intent){
         this.intent=intent
-        dataType=type
-        items.clear()
-        items.addAll(data)
-        notifyDataSetChanged()
+         attachData(data,type)
    }
 
     fun attachData(data:HashSet<ResultsData>,type:Int){
@@ -35,23 +43,22 @@ class PossibleResultsRecyclerViewAdapter():RecyclerView.Adapter<BaseViewHolder>(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
         val inflater=LayoutInflater.from(parent.context)
         val view: View
-        return when(viewType){
+        val holder= when(viewType){
             0->{
                 view=inflater.inflate(R.layout.possible_contacts_results_recycler_design,parent,false)
-                val viewHolder= PossibleContactsResultsViewHolder(view,items,intent)
+                val viewHolder= PossibleContactsResultsViewHolder(view,items,intent,parent)
                 viewHolder.itemClick={itemClick?.invoke(it)}
                 viewHolder
             }
             else->{
                 view= inflater.inflate(R.layout.possible_matches_recycler_design,parent,false)
-                val viewHolder=PossibleMatchesViewHolder(view,items,intent)
+                val viewHolder=PossibleMatchesViewHolder(view,items,intent,parent)
                 viewHolder.itemClick={itemClick?.invoke(it)}
                 viewHolder
             }
         }
-
+        return holder
     }
-
 
     override fun getItemCount()=items.size
 
@@ -60,10 +67,9 @@ class PossibleResultsRecyclerViewAdapter():RecyclerView.Adapter<BaseViewHolder>(
     }
 
     override fun getItemViewType(position: Int): Int {
-        if (dataType==0)
-            return 0
-        else
-            return 1
+        when (dataType) {
+            0 -> return 0
+            else -> return 1
+        }
     }
-
 }

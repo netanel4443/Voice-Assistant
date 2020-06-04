@@ -1,6 +1,7 @@
 package com.e.VoiceAssistant.presenters
 
 import android.content.Intent
+import android.media.AudioManager
 import android.net.Uri
 import com.e.VoiceAssistant.R
 import com.e.VoiceAssistant.data.AppsDetails
@@ -9,36 +10,29 @@ import com.e.VoiceAssistant.presenters.presentersStates.TalkAndResultsPresenterV
 import com.e.VoiceAssistant.ui.recyclerviews.datahelpers.ResultsData
 import com.e.VoiceAssistant.usecases.OpenDesiredAppPresenterUseCase
 import com.e.VoiceAssistant.usecases.TalkAndResultUseCases
+import com.e.VoiceAssistant.utils.printIfDebug
 import com.e.VoiceAssistant.utils.rxJavaUtils.subscribeOnIoAndObserveOnMain
-import com.e.VoiceAssistant.utils.rxJavaUtils.throttle
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.PublishSubject
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @ActivityScope
 class TalkAndResultsPresenter@Inject constructor(
-    private val useCases:TalkAndResultUseCases){
+    private val useCases:TalkAndResultUseCases,
+    private val openDesiredAppPresenterUseCase:OpenDesiredAppPresenterUseCase){
+
+    private val TAG=this::class.simpleName
     private val compositeDisposable=CompositeDisposable()
     private var talkBtnIcon=R.drawable.ic_mic_white_background_24
-    private val clickSubject= PublishSubject.create<Int>()
     private var lastOperationIntent=Intent()
     private var operation=""
     private var message=""
     private var operationOfReplacedResult=""
-
-    init {
-        +clickSubject
-            .observeOn(AndroidSchedulers.mainThread())
-            .throttle()
-            .doOnNext { view.handleClick(it) }
-            .subscribe({},{})
-    }
 
     lateinit var view:TalkAndResultsPresenterView
 
@@ -49,7 +43,7 @@ class TalkAndResultsPresenter@Inject constructor(
     }
 
     fun handleTalkOrStopClick() {
-       clickSubject.onNext(talkBtnIcon)
+        view.handleClick(talkBtnIcon)
     }
 
     fun changeTalkBtnIcon(){
@@ -64,17 +58,19 @@ class TalkAndResultsPresenter@Inject constructor(
 
     fun checkIfTalkBtnIconChanged(){
         if (talkBtnIcon==R.drawable.ic_pause_white_background_24){
-            clickSubject.onNext(talkBtnIcon)
+            view.handleClick(talkBtnIcon)
         }
     }
 
     fun checkIfSecondListenRequired(matches: ArrayList<String>,
                                     appComponent: HashMap<String, AppsDetails>,
                                     contactList: HashMap<String,String> ){
-        if (operation=="הודעה"||operation=="text") {
+        /*check if intent.action is null , if it is , skip second listen because, no contact number was found
+        in user's contact list and we don't want to record a message to no one, it won't work.*/
+        if ((operation=="הודעה"||operation=="text")&&lastOperationIntent.action!=null) {
            handleSecondListen(matches[0],::handleSecondListenForSms)
         }
-        else if ( operation=="וואטסאפ" || operation=="whatsapp"){
+        else if ((( operation=="וואטסאפ" || operation=="whatsapp"))&&lastOperationIntent.action!=null){
             handleSecondListen(matches[0],::handleSecondListenForWhatsApp)
         }
         else {
@@ -114,62 +110,71 @@ class TalkAndResultsPresenter@Inject constructor(
                 operationOfReplacedResult=it.first //keep if second listen is needed
                 operation=it.first //keep if second listen is needed
                 checkRequestedOperation(it.first,appComponent,contactList,matches,it.second)
-            },{it.printStackTrace()
-            })
+            },{ printIfDebug(TAG,it.message) })
     }
 
     private fun requiredOperationIsWhatsApp(matches: ArrayList<String>, requiredOpration: String, contactList: HashMap<String, String>){
         +useCases.sendWhatsApp(matches,requiredOpration,contactList)
             .subscribeOnIoAndObserveOnMain()
             .subscribe({pair->checkIntentType(pair.first,pair.second as HashSet<ResultsData>)},{
-                it.printStackTrace()
+                printIfDebug(TAG,it.message)
             })
     }
 
     private fun requiredOperationIsSendSms(matches: ArrayList<String>, requiredOpration: String, contactList: HashMap<String, String>){
         +useCases.sendSms(matches,requiredOpration,contactList)
             .subscribeOnIoAndObserveOnMain()
-            .subscribe({ pair->checkIntentType(pair.first,pair.second as HashSet<ResultsData>) }, {
-                it.printStackTrace()
-            })
+            .subscribe({ pair->
+                checkIntentType(pair.first,pair.second as HashSet<ResultsData>) }
+                     , { printIfDebug(TAG,it.message) })
     }
 
     private fun requiredOperationIsCallTo(matches: ArrayList<String>, requiredOpration: String, contactList: HashMap<String, String>){
         +useCases.callTo(matches,requiredOpration,contactList)
             .subscribeOnIoAndObserveOnMain()
-            .subscribe({pair->view.navigateToDesiredApp(pair.first,pair.second as HashSet<ResultsData>,0)},{
-                it.printStackTrace()
-            })
+            .subscribe({ pair->view.navigateToDesiredApp(pair.first,pair.second as HashSet<ResultsData>,0)}
+                      ,{ printIfDebug(TAG,it.message) })
     }
 
     private fun requiredOperationIsSearchInYoutube(matches: ArrayList<String>,requiredOpration: String){
         +useCases.searchInYoutube(matches,requiredOpration)
             .subscribeOnIoAndObserveOnMain()
             .subscribe({ view.showResults(it.second as HashSet<ResultsData>,1)},{
-                it.printStackTrace()
+                printIfDebug(TAG,it.message)
             })
     }
-    private fun requiredOperationIsSearchInSpotify(appComponent: HashMap<String, AppsDetails>, matches: ArrayList<String>, requiredOpration: String){
-        +useCases.searchInSpotify(appComponent, matches,requiredOpration)
+
+    private fun requiredOperationIsSearchInSpotify( matches: ArrayList<String>, requiredOpration: String){
+        +useCases.searchInSpotify(matches,requiredOpration)
             .subscribeOnIoAndObserveOnMain()
-            .subscribe({ view.showResults(it.second as HashSet<ResultsData>,1)},{it.printStackTrace()})
+            .subscribe({ view.showResults(it.second as HashSet<ResultsData>,1)},{ printIfDebug(TAG,it.message)})
     }
 
     private fun requiredOperationIsSearchInWeb(matches: ArrayList<String>, requiredOpration: String){
         +useCases.searchInWeb(matches,requiredOpration)
             .subscribeOnIoAndObserveOnMain()
-            .subscribe({ view.showResults(it.second as HashSet<ResultsData>,1)},{it.printStackTrace()})
+            .subscribe({ view.showResults(it.second as HashSet<ResultsData>,1)},{ printIfDebug(TAG,it.message)})
     }
     private fun requiredOperationIsNavigate(requiredOpration: String,matches: ArrayList<String>){
         +useCases.navigateTo(requiredOpration, matches)
             .subscribeOnIoAndObserveOnMain()
-            .subscribe({view.navigateToDesiredApp(it.first,it.second as HashSet<ResultsData>,1)},{it.printStackTrace()})
+            .subscribe({view.navigateToDesiredApp(it.first,it.second as HashSet<ResultsData>,1)},{ printIfDebug(TAG,it.message)})
     }
 
     private fun requiredOperationIsOpenAnApp(appComponent: HashMap<String, AppsDetails>, splitedResultsLset:LinkedHashSet<String>){
-        +OpenDesiredAppPresenterUseCase().getDesiredIntent(appComponent,splitedResultsLset)
+        +openDesiredAppPresenterUseCase.getDesiredIntent(appComponent,splitedResultsLset)
             .subscribeOnIoAndObserveOnMain()
-            .subscribe({ intent->view.navigateToDesiredApp(intent,HashSet(),1) },{it.printStackTrace()})
+            .subscribe({ intent-> view.navigateToDesiredApp(intent,HashSet(),1) },{ printIfDebug(TAG,it.message)})
+    }
+    fun requiredOperationIsMuteOrUnmute(audioManager: AudioManager){
+        when (operation) {
+            "mute", "השתק" -> { useCases.mute(audioManager)   }
+            "unmute","צליל" -> { useCases.unmute(audioManager) }
+        }
+    }
+
+    fun requiredOperationIsUnmute(audioManager: AudioManager){
+        useCases.unmute(audioManager)
     }
 
     private fun checkRequestedOperation(
@@ -185,7 +190,7 @@ class TalkAndResultsPresenter@Inject constructor(
                 requiredOperationIsCallTo(matches,requiredOperation,contactList)
             }
             "spotify", "ספוטיפיי" -> {
-                requiredOperationIsSearchInSpotify(appComponent,matches,requiredOperation)
+                requiredOperationIsSearchInSpotify(matches,requiredOperation)
             }
             "youtube", "יוטיוב" -> {
                 requiredOperationIsSearchInYoutube(matches,requiredOperation)
@@ -199,22 +204,23 @@ class TalkAndResultsPresenter@Inject constructor(
             "וואטסאפ", "whatsapp" -> {
                 requiredOperationIsWhatsApp(matches,requiredOperation,contactList)
             }
+            "השתק","mute","צליל","unmute"->{
+              view.muteOrUnmute()
+            }
             else -> {
                 requiredOperationIsSearchInWeb(matches,requiredOperation)
             }
         }
     }
-    fun changeSelectedResult(resultsData: ResultsData,
-                             appComponent: HashMap<String, AppsDetails>){
-        +useCases.changeSelectedResult(operationOfReplacedResult,resultsData,appComponent,message)
+    fun changeSelectedResult(resultsData: ResultsData){
+        +useCases.changeSelectedResult(operationOfReplacedResult,resultsData,message)
             .subscribeOnIoAndObserveOnMain()
             .subscribe({intent->view.navigateToDesiredApp(intent)},{
-                it.printStackTrace()
+                printIfDebug(TAG,it.message)
             })
     }
 
     private fun checkIntentType( intent: Intent,contacts:HashSet<ResultsData>){
-      //  println("intent ${intent.data}")
         lastOperationIntent=intent
         view.secondListenToUser(contacts,0,intent)
     }
@@ -223,7 +229,7 @@ class TalkAndResultsPresenter@Inject constructor(
         var counter=3
         return Observable.fromCallable{counter}
             .subscribeOn(AndroidSchedulers.mainThread())
-            .doOnNext {count-> view.timerAnimation(count) }
+            .doOnNext { count-> view.timerAnimation(count) }
             .delay(1, TimeUnit.SECONDS,Schedulers.io())
             .map {
                 counter -= 1

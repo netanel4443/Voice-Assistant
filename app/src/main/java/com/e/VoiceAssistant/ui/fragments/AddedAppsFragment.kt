@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.e.VoiceAssistant.R
 import com.e.VoiceAssistant.data.AppsDetails
 import com.e.VoiceAssistant.ui.recyclerviews.recyclerviewsadapters.AddedAppsRecyclerAdapter
-import com.e.VoiceAssistant.userscollectreddata.AppsDetailsSingleton
+import com.e.VoiceAssistant.userscollecteddata.AppsDetailsSingleton
 import com.e.VoiceAssistant.viewmodels.AddCustomAppNameViewModel
 import com.e.VoiceAssistant.viewmodels.states.AddCustomAppNameStates
 import kotlinx.android.synthetic.main.fragment_added_apps.*
@@ -42,7 +42,7 @@ class AddedAppsFragment : BaseFragment() {
 
         viewModel.getState().observe(viewLifecycleOwner, Observer {state->
             when(state){
-                 is AddCustomAppNameStates.RemoveItemFromAppList->removeItemfromServiceAppList(state.name)
+                 is AddCustomAppNameStates.RemoveItemFromAppList->removeItemfromServiceAppList()
             }
         })
     }
@@ -51,7 +51,6 @@ class AddedAppsFragment : BaseFragment() {
     private fun initRecyclerView() {
 
         val recyclerView=recyclerFragAddedApps
-     //   println("list size ${list.size}")
         adapter= AddedAppsRecyclerAdapter(addedApps){ name->
             viewModel.deleteAppFromList(name)
         }
@@ -60,7 +59,7 @@ class AddedAppsFragment : BaseFragment() {
         recyclerView.setHasFixedSize(true)
     }
 
-    private fun removeItemfromServiceAppList(name:String){
+    private fun removeItemfromServiceAppList(){
         adapter.notifyDataSetChanged()
     }
 

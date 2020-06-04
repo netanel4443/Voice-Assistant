@@ -1,4 +1,4 @@
-package com.e.VoiceAssistant.userscollectreddata
+package com.e.VoiceAssistant.userscollecteddata
 
 import com.e.VoiceAssistant.data.AppsDetails
 import com.e.VoiceAssistant.di.annotations.AppScope

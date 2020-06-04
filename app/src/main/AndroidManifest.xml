@@ -18,9 +18,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+
         <activity android:name=".ui.activities.TalkAndResultsActivity"
-            android:theme="@style/Theme.AppCompat.SemiTransparent">
-        </activity>
+            android:theme="@style/Theme.AppCompat.SemiTransparent"/>
+
         <activity
             android:name=".ui.splashScreen.LoadDataSplashActivity"
             android:theme="@style/Theme.AppCompat.Transparent.NoActionBar">
@@ -30,13 +31,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity android:name=".ui.activities.AddCustomAppNameActivity" />
+
         <activity
             android:name=".ui.activities.PermissionsActivity"
             android:theme="@style/Theme.AppCompat.Transparent.NoActionBar" />
+
         <activity
             android:name=".ui.splashScreen.LoadingSplashScreen"
             android:theme="@style/Theme.AppCompat.Transparent.NoActionBar" />
+
         <activity android:name=".ui.onboarding.OnBoardingActivity" />
 
         <service
@@ -47,6 +52,7 @@
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-8194360858461012~8844399517" />
+
     </application>
 
 </manifest>

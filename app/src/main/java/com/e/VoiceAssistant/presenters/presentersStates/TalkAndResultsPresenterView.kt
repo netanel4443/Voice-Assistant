@@ -13,4 +13,5 @@ interface TalkAndResultsPresenterView {
     fun secondListenToUser(contacts:HashSet<ResultsData>, dataType: Int, intent: Intent)
     fun timerAnimation(counter:Int)
     fun showResults(results:HashSet<ResultsData>, dataType: Int)
+    fun muteOrUnmute() {}
 }

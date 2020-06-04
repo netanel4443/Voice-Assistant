@@ -8,10 +8,8 @@ import android.content.SharedPreferences
 import android.media.AudioManager
 import android.os.Bundle
 import android.speech.SpeechRecognizer
-import android.speech.tts.TextToSpeech
 import android.view.View
 import android.view.animation.AnimationUtils
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.e.VoiceAssistant.R
@@ -28,19 +26,18 @@ import com.e.VoiceAssistant.ui.recyclerviews.datahelpers.ResultsData
 import com.e.VoiceAssistant.ui.recyclerviews.recyclerviewsadapters.OperationsKeyWordsAdapter
 import com.e.VoiceAssistant.ui.recyclerviews.recyclerviewsadapters.PossibleResultsRecyclerViewAdapter
 import com.e.VoiceAssistant.usecases.ContactList
-import com.e.VoiceAssistant.userscollectreddata.AppsDetailsSingleton
+import com.e.VoiceAssistant.userscollecteddata.AppsDetailsSingleton
+import com.e.VoiceAssistant.utils.printIfDebug
 import com.e.VoiceAssistant.utils.rxJavaUtils.subscribeOnIoAndObserveOnMain
 import com.e.VoiceAssistant.utils.rxJavaUtils.throttle
 import com.e.VoiceAssistant.utils.toast
 import com.e.VoiceAssistant.utils.toastLong
-import com.jakewharton.rxbinding.view.RxView
+import com.jakewharton.rxbinding3.view.clicks
 import dagger.android.support.DaggerAppCompatActivity
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.activity_talk_and_results.*
-import rx.Subscription
-import rx.subscriptions.CompositeSubscription
 import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -57,7 +54,6 @@ class TalkAndResultsActivity : DaggerAppCompatActivity() , TalkAndResultsPresent
     private var appsDetailsHmap=HashMap<String, AppsDetails>()
     private var concatList = HashMap<String, String>()
     private val TAG = "TalkAndResultsActivity"
-    private val compositeSubscription= CompositeSubscription()
     private val compositeDisposable= CompositeDisposable()
     private  lateinit var adapter: PossibleResultsRecyclerViewAdapter
 
@@ -68,17 +64,17 @@ class TalkAndResultsActivity : DaggerAppCompatActivity() , TalkAndResultsPresent
         firstInits()
         initContactListAndSpeechRecognition ()
 
-        clickToTalkOrStopBtn.setOnClickListener {
+        +clickToTalkOrStopBtn.clicks().throttle().subscribe {
             presenter.handleTalkOrStopClick()
         }
 
-        +RxView.clicks(settings).throttle().subscribe {
+        +settings.clicks().throttle().subscribe {
             val intent = Intent(this, AddCustomAppNameActivity::class.java)
             startActivity(intent)
             //  navigateToDesiredApp(intent)
         }
 
-        +RxView.clicks(floatingHelp).throttle().subscribe {
+       +floatingHelp.clicks().throttle().subscribe {
             FloatingRepresentOperationsDialog(this).show()
         }
     }
@@ -102,7 +98,7 @@ class TalkAndResultsActivity : DaggerAppCompatActivity() , TalkAndResultsPresent
 
     private fun initRecyclerView() {
         adapter= PossibleResultsRecyclerViewAdapter()
-        adapter.itemClick={presenter.changeSelectedResult(it,appsDetailsHmap)}
+        adapter.itemClick={presenter.changeSelectedResult(it)}
         possibleResultsRecyclerView.adapter=adapter
         possibleResultsRecyclerView.layoutManager=LinearLayoutManager(this,RecyclerView.VERTICAL,false)
         possibleResultsRecyclerView.setHasFixedSize(true)
@@ -139,18 +135,17 @@ class TalkAndResultsActivity : DaggerAppCompatActivity() , TalkAndResultsPresent
         talkIntent = SpeechRecognizer.createSpeechRecognizer(this)
         talkIntent.setRecognitionListener(
             HandleSpeechRecognition(object : CommandsForSpeechListenerService {
-            override fun onError(message: String) {
-                toast(message)
-            }
-            override fun changeTalkIcon() {
-                presenter.checkIfTalkBtnIconChanged()
-            }
-            override fun checkForResults(matches:ArrayList<String>) {
-                presenter.checkIfSecondListenRequired(matches,appsDetailsHmap,concatList)
-            }
+                override fun onError(message: String) {
+                    toast(message)
+                }
 
-            override fun relisten() {
-            }
+                override fun changeTalkIcon() {
+                    presenter.checkIfTalkBtnIconChanged()
+                }
+
+                override fun checkForResults(matches: ArrayList<String>) {
+                    presenter.checkIfSecondListenRequired(matches, appsDetailsHmap, concatList)
+                }
             })
         )
     }
@@ -163,10 +158,11 @@ class TalkAndResultsActivity : DaggerAppCompatActivity() , TalkAndResultsPresent
             } else {
                 talkIntent.stopListening()
                 /*timer added to cancel because the api sometimes stuck at "Busy state" and we can't
-                *perform a new operation*/
-                +Observable.timer(500,TimeUnit.MILLISECONDS)
+                *perform a new operation. 800 millis because we can click every 1 sec so the range need to be 0-1s
+                * 800 millis delay works fine.*/
+                +Observable.timer(800,TimeUnit.MILLISECONDS)
                     .subscribeOnIoAndObserveOnMain()
-                    .subscribe{talkIntent.cancel() }
+                    .subscribe{ talkIntent.cancel() }
                 presenter.changeTalkBtnIcon()
             }
         }
@@ -177,10 +173,9 @@ class TalkAndResultsActivity : DaggerAppCompatActivity() , TalkAndResultsPresent
     }
 
     override fun navigateToDesiredApp(intent: Intent, results: HashSet<ResultsData>,dataType: Int) {
-        println("intent ${intent.data}")
+        printIfDebug(TAG, intent.data.toString())
         if (checkIfPermissionRequired(intent))
         {
-
             try {
                 startActivity(intent)
                 adapter.attachData(results,dataType,intent)
@@ -241,6 +236,12 @@ class TalkAndResultsActivity : DaggerAppCompatActivity() , TalkAndResultsPresent
         val intent = Intent(this, AddCustomAppNameActivity::class.java)
         startActivity(intent)
     }
+
+    override fun muteOrUnmute() {
+        val audioManager=getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        presenter.requiredOperationIsMuteOrUnmute(audioManager)
+    }
+
     override fun onResume() {
         super.onResume()
         talk_and_result_activity_adView.resume()
@@ -260,11 +261,7 @@ class TalkAndResultsActivity : DaggerAppCompatActivity() , TalkAndResultsPresent
         presenter.dispose()
         talkIntent.destroy()
         compositeDisposable.clear()
-        compositeSubscription.clear()
     }
-
-    private inline operator fun<reified T : Subscription> T.unaryPlus() =
-        compositeSubscription.add(this)
 
     private inline operator fun<reified T : Disposable> T.unaryPlus() =
         compositeDisposable.add(this)
