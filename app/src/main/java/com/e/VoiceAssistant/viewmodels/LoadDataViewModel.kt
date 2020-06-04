@@ -4,6 +4,7 @@ import android.content.pm.PackageManager
 import android.content.res.Resources
 import com.e.VoiceAssistant.data.AppsDetails
 import com.e.VoiceAssistant.usecases.LoadDataUseCase
+import com.e.VoiceAssistant.utils.printIfDebug
 import com.e.VoiceAssistant.utils.rxJavaUtils.subscribeOnIoAndObserveOnMain
 import com.e.VoiceAssistant.viewmodels.commands.LoadDataCommands
 import io.reactivex.Observable
@@ -13,6 +14,7 @@ import javax.inject.Inject
 
 class LoadDataViewModel @Inject constructor(
     private val useCases: LoadDataUseCase):BaseViewModel() {
+    private val TAG=this::class.simpleName
     private val _commands=PublishSubject.create<LoadDataCommands>()
     val commands get() = _commands
 
@@ -28,7 +30,7 @@ class LoadDataViewModel @Inject constructor(
 
        +Observable.combineLatest(observableList){}
            .subscribeOnIoAndObserveOnMain()
-           .subscribe{_commands.onNext(LoadDataCommands.LoadComplete)}
+           .subscribe({_commands.onNext(LoadDataCommands.LoadComplete)},{ printIfDebug(TAG,it.message)})
    }
 
     private fun getStoredAppsDetails(hashMap: HashMap<String, AppsDetails>):Single<HashMap<String,AppsDetails>> {

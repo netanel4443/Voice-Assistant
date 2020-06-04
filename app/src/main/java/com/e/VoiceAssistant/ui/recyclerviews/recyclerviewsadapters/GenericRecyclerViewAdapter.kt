@@ -6,8 +6,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.e.VoiceAssistant.ui.recyclerviews.viewholders.GenericViewHolder
 
 open class GenericRecyclerViewAdapter<T> : RecyclerView.Adapter<GenericViewHolder<T>>() {
-     protected var items= HashSet<T>()
-     var itemClick:((T)->Unit)?=null
+    protected var items= HashSet<T>()
+    var itemClick:((T)->Unit)?=null
 
     fun attachData(data:HashSet<T>){
         items.clear()

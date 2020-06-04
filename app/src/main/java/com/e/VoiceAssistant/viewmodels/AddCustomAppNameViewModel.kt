@@ -6,18 +6,17 @@ import android.view.View
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.e.VoiceAssistant.R
-import com.e.VoiceAssistant.data.SavedAppsDetails
 import com.e.VoiceAssistant.data.AppsDetails
+import com.e.VoiceAssistant.data.SavedAppsDetails
 import com.e.VoiceAssistant.di.annotations.ActivityScope
 import com.e.VoiceAssistant.usecases.SpeechRecognitionUseCases
+import com.e.VoiceAssistant.utils.printIfDebug
 import com.e.VoiceAssistant.utils.rxJavaUtils.subscribeOnIoAndObserveOnMain
 import com.e.VoiceAssistant.utils.rxJavaUtils.throttle
 import com.e.VoiceAssistant.viewmodels.states.AddCustomAppNameStates
 import io.reactivex.Single
 import io.reactivex.subjects.PublishSubject
 import javax.inject.Inject
-import kotlin.collections.HashMap
-import kotlin.collections.LinkedHashMap
 
 @ActivityScope
 class AddCustomAppNameViewModel @Inject constructor(
@@ -78,7 +77,7 @@ class AddCustomAppNameViewModel @Inject constructor(
                     }
                     addItemToAppList(tmpNewName,appToBeSaved.activity,appToBeSaved.pckg,icon,realName)
                 },
-                {/*   it.printStackTrace()*/ })
+                {   printIfDebug(TAG,it.message) })
     }
 
     fun deleteAppFromList(name: String){
@@ -91,7 +90,7 @@ class AddCustomAppNameViewModel @Inject constructor(
                     addedApps.remove(name)
                     removeItemFromAppList(name)
                 },
-                {/*   it.printStackTrace()*/ })
+                {   printIfDebug(TAG,it.message) })
     }
 
     private fun removeItemFromAppList(name:String){

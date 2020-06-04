@@ -3,7 +3,7 @@ package com.e.VoiceAssistant.sensors
 import android.os.Bundle
 import android.speech.RecognitionListener
 import android.speech.SpeechRecognizer
-import com.e.VoiceAssistant.utils.printMessage
+import com.e.VoiceAssistant.utils.printIfDebug
 
 class HandleSpeechRecognition(private val view:CommandsForSpeechListenerService):RecognitionListener {
 
@@ -17,13 +17,9 @@ class HandleSpeechRecognition(private val view:CommandsForSpeechListenerService)
 
     override fun onEvent(eventType: Int, params: Bundle?) {}
 
-    override fun onBeginningOfSpeech() {
-        println("onBeginningOfSpeech")
-    }
+    override fun onBeginningOfSpeech() {}
 
-    override fun onEndOfSpeech() {
-        println("onEndOfSpeech")
-    }
+    override fun onEndOfSpeech() {}
 
     override fun onError(error: Int) {
         val message: String = when (error) {
@@ -48,7 +44,7 @@ class HandleSpeechRecognition(private val view:CommandsForSpeechListenerService)
     override fun onResults(results: Bundle?) {
         val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)!!
           matches.forEach{
-           println("matches $it")
+           printIfDebug("matches", it)
           }
         view.changeTalkIcon()
         view.checkForResults(matches)

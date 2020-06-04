@@ -26,7 +26,7 @@ import com.e.VoiceAssistant.ui.services.BaseService
 import com.e.VoiceAssistant.ui.services.SpeechRecognizerService.notifications.ForegroundNotification
 import com.e.VoiceAssistant.ui.uiHelpers.TouchHelper
 import com.e.VoiceAssistant.ui.uiHelpers.touchListener.MultiTouchListener
-import com.e.VoiceAssistant.userscollectreddata.AppsDetailsSingleton
+import com.e.VoiceAssistant.userscollecteddata.AppsDetailsSingleton
 import com.e.VoiceAssistant.utils.toast
 import kotlinx.android.synthetic.main.floating_trash_screen.view.*
 import kotlinx.android.synthetic.main.floating_widget_layout.view.*
@@ -116,7 +116,6 @@ class SpeechRecognizerService : BaseService(), SpeechRecognizerServicePresenterS
         val prefs = sharedPrefs.getBoolean("seen", false)
         if (!prefs) {
             val intent = Intent(this, OnBoardingActivity::class.java)
-
             navigateToDesiredApp(intent)
         }
     }

@@ -1,11 +1,10 @@
 package com.e.VoiceAssistant.ui.activities
 
-import android.Manifest.*
+import android.Manifest.permission
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.speech.SpeechRecognizer
-import android.speech.tts.TextToSpeech
 import android.view.View
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,22 +12,25 @@ import androidx.recyclerview.widget.RecyclerView
 import com.e.VoiceAssistant.R
 import com.e.VoiceAssistant.data.AppsDetails
 import com.e.VoiceAssistant.data.SavedAppsDetails
-import com.e.VoiceAssistant.permissions.RequestGlobalPermission
-import com.e.VoiceAssistant.sensors.AddAppSpeechRecognitionHelper
-import com.e.VoiceAssistant.ui.fragments.AddedAppsFragment
-import com.e.VoiceAssistant.ui.dialogs.CircleProgressBarDialog
-import com.e.VoiceAssistant.ui.recyclerviews.recyclerviewsadapters.AppsDetailsRecyclerViewAdapter
 import com.e.VoiceAssistant.permissions.RequestCodes
+import com.e.VoiceAssistant.permissions.RequestGlobalPermission
 import com.e.VoiceAssistant.permissions.StartActivityToCheckPermission
+import com.e.VoiceAssistant.sensors.AddAppSpeechRecognitionHelper
 import com.e.VoiceAssistant.sensors.SpeechStates
 import com.e.VoiceAssistant.ui.ads.Adrequest
-import com.e.VoiceAssistant.userscollectreddata.AppsDetailsSingleton
-import com.e.VoiceAssistant.utils.*
+import com.e.VoiceAssistant.ui.dialogs.CircleProgressBarDialog
+import com.e.VoiceAssistant.ui.fragments.AddedAppsFragment
+import com.e.VoiceAssistant.ui.recyclerviews.recyclerviewsadapters.AppsDetailsRecyclerViewAdapter
+import com.e.VoiceAssistant.userscollecteddata.AppsDetailsSingleton
+import com.e.VoiceAssistant.utils.addFragment
+import com.e.VoiceAssistant.utils.printIfDebug
 import com.e.VoiceAssistant.utils.rxJavaUtils.subscribeOnIoAndObserveOnMain
 import com.e.VoiceAssistant.utils.rxJavaUtils.throttle
+import com.e.VoiceAssistant.utils.toast
 import com.e.VoiceAssistant.viewmodels.AddCustomAppNameViewModel
 import com.e.VoiceAssistant.viewmodels.states.AddCustomAppNameStates
-import com.jakewharton.rxbinding.view.RxView
+import com.jakewharton.rxbinding3.view.clicks
+import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.android.synthetic.main.activity_add_custom_app_name.*
 import javax.inject.Inject
 
@@ -79,15 +81,14 @@ class AddCustomAppNameActivity : BaseActivity() {
             viewModel.initCachedSettingsActivityUI()
         }
 
-        +RxView.clicks(startTalkSettingsActivity).observeOn(rx.android.schedulers.AndroidSchedulers.mainThread())
-            .filter { RequestGlobalPermission.
-              check(this, permission.RECORD_AUDIO,RequestCodes.RECORD_AUDIO)
+        +startTalkSettingsActivity.clicks().observeOn(AndroidSchedulers.mainThread())
+            .filter { RequestGlobalPermission.check(
+                this, permission.RECORD_AUDIO,RequestCodes.RECORD_AUDIO
+                     )
             }
-            .subscribe {
-                viewModel.handleTalkOrStopClick()
-            }
+            .subscribe { viewModel.handleTalkOrStopClick() }
 
-        +RxView.clicks(addBtnSettingsActivity).throttle().subscribe {
+        +addBtnSettingsActivity.clicks().throttle().subscribe {
             val newName=newAppNameSettignsActivity.text.toString()
             if ( newName.isNotBlank()&&selectedApp.realName.isNotBlank() ){
                  viewModel.saveApp(selectedApp,selectedIcon)
@@ -98,7 +99,7 @@ class AddCustomAppNameActivity : BaseActivity() {
             }
         }
 
-        +RxView.clicks(showAddedAppsListBtn).throttle().subscribe {
+        +showAddedAppsListBtn.clicks().throttle().subscribe {
             addFragment(AddedAppsFragment(), R.id.frame_layout,"AddedAppsFragment")
         }
     }
@@ -204,8 +205,7 @@ class AddCustomAppNameActivity : BaseActivity() {
             .subscribeOnIoAndObserveOnMain()
             .subscribe(
                 { intnt=it },
-                { //it.printStackTrace()
-                })
+                { printIfDebug(TAG,it.message) })
     }
     override fun onResume() {
         super.onResume()

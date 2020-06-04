@@ -59,6 +59,8 @@
          <!--   <item>Navigate</item> -->
         <item>WhatsApp</item>
         <item>Text</item>
+        <item>Mute</item>
+        <item>Unmute</item>
     </string-array>
 
     <integer-array name="operations_images">
@@ -68,9 +70,11 @@
         <item>@drawable/ic_music_note_black_24dp</item>
         <item>@drawable/ic_music_note_black_24dp</item>
         <!--    <item>@drawable/ic_navigate_black_24dp</item> -->
-            <item>@drawable/ic_message_black_24dp</item>
-            <item>@drawable/ic_message_black_24dp</item>
-        </integer-array>
+        <item>@drawable/ic_message_black_24dp</item>
+        <item>@drawable/ic_message_black_24dp</item>
+        <item>@drawable/ic_baseline_volume_off_24</item>
+        <item>@drawable/ic_baseline_volume_up_24</item>
+    </integer-array>
 
 
         <string name="record_in">Record a message in:</string>

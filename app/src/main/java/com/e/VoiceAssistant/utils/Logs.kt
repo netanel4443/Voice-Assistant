@@ -1,3 +1,10 @@
 package com.e.VoiceAssistant.utils
 
-fun printMessage(TAG:String,message:Any){ println("$TAG : $message") }
+import com.e.VoiceAssistant.utils.Debug.DBG
+
+object Debug { const val DBG=true }
+
+fun printIfDebug(TAG: String?, message:String?){
+    if (DBG){ println("$TAG : $message")
+    }
+}

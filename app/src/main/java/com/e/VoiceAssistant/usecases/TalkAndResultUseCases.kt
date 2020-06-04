@@ -3,15 +3,15 @@ package com.e.VoiceAssistant.usecases
 import android.app.SearchManager
 import android.content.ComponentName
 import android.content.Intent
+import android.media.AudioManager
 import android.net.Uri
 import android.provider.MediaStore
-import com.e.VoiceAssistant.data.AppsDetails
 import com.e.VoiceAssistant.di.annotations.ActivityScope
 import com.e.VoiceAssistant.ui.recyclerviews.datahelpers.ContactsData
 import com.e.VoiceAssistant.ui.recyclerviews.datahelpers.PossibleMatches
 import com.e.VoiceAssistant.ui.recyclerviews.datahelpers.ResultsData
 import com.e.VoiceAssistant.usecases.commons.RecognizerIntentInit
-import com.e.VoiceAssistant.userscollectreddata.AppsDetailsSingleton
+import com.e.VoiceAssistant.userscollecteddata.AppsDetailsSingleton
 import io.reactivex.Observable
 import io.reactivex.Single
 import java.util.*
@@ -24,9 +24,9 @@ class TalkAndResultUseCases @Inject constructor(
     private val loadedData:AppsDetailsSingleton
 ) {
     private val requiredOperationsHset=
-        hashSetOf("הודעה","text","וואטסאפ","whatsapp",
-          "youtube","יוטיוב","ספוטיפיי","spotify",
-            "call","התקשר","תקשר","תתקשר","search", "פתח","אופן","open","חפש")
+        hashSetOf("הודעה","text","וואטסאפ","whatsapp","השתק","mute","umute","צליל",
+                  "youtube","יוטיוב","ספוטיפיי","spotify",
+                  "call","התקשר","תקשר","תתקשר","search", "פתח","אופן","open","חפש")
     //todo fix send sms/whatsapp bug , sends sms  even if I canceled the second record
 
     fun initRecognizerIntent():Single<Intent> {
@@ -71,7 +71,8 @@ class TalkAndResultUseCases @Inject constructor(
     }
 
     fun sendWhatsApp(matches:ArrayList<String>, requiredOperation: String, contactList: HashMap<String, String>):Observable<Pair<Intent,HashSet<ContactsData>>>{
-        return findContact(matches,contactList,requiredOperation,::sendWhatsAppIntent)
+        val result=findContact(matches,contactList,requiredOperation,::sendWhatsAppIntent)
+        return result
     }
 
     private fun sendWhatsAppIntent(contactNumber: String):Intent{
@@ -90,12 +91,11 @@ class TalkAndResultUseCases @Inject constructor(
         return Intent(Intent.ACTION_VIEW).apply { data= uri }
     }
     private fun addCountryPhoneDigits(contactNumber: String):String{
-       var contactWithCountryDigits=contactNumber
        val digits=loadedData.countryLocaleDigits
 
        return if (!contactNumber.startsWith(digits)) {
-           contactWithCountryDigits=digits+contactNumber
-           contactWithCountryDigits
+         val  contactWithCountryDigits=digits+contactNumber
+              contactWithCountryDigits
        } else {
            contactNumber
        }
@@ -121,15 +121,12 @@ class TalkAndResultUseCases @Inject constructor(
         }
     }
 
-    fun searchInSpotify(appComponent: HashMap<String, AppsDetails>, matches: ArrayList<String>, requiredOperation: String):Observable<Pair<Intent,HashSet<PossibleMatches>>>{
-        val possibleMatches=getPossibleMatchesWithout(matches,requiredOperation)
-        val finalQuery=possibleMatches.first()
-        val intent=searchInSpotifyIntent(finalQuery.match,appComponent)
-        return Observable.just(Pair(intent,possibleMatches))
+    fun searchInSpotify(matches: ArrayList<String>, requiredOperation: String):Observable<Pair<Intent,HashSet<PossibleMatches>>>{
+       return genericSearch(::searchInSpotifyIntent,matches,requiredOperation)
     }
 
-    private fun searchInSpotifyIntent(query: String,appComponent: HashMap<String, AppsDetails>):Intent{
-        return appComponent["spotify"]?.run {
+    private fun searchInSpotifyIntent(query: String):Intent{
+        return loadedData.appsDetailsHmap["spotify"]?.run {
             val intent = Intent(Intent.ACTION_MAIN)
             intent.action = MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH
             intent.component = ComponentName(activity, pckg)
@@ -244,19 +241,17 @@ class TalkAndResultUseCases @Inject constructor(
                     contactList.keys.forEach {key->
                         if (key.contains(contactName)){
                             val number=contactList[key]
-                         //   println("possible $key $number")
                             tmpNameAndNumberHmap.add(ContactsData(key,number.toString()))
                         }
                     }
                 }
             }
-         //   println("size $tmpNameAndNumberHmap")
             tmpNameAndNumberHmap
         }
             .filter { it.isNotEmpty() }
             .map { contacts->
-                namesAndNumbers.addAll(contacts)
-                contacts.first().number
+                  namesAndNumbers.addAll(contacts)
+                  contacts.first().number
             }
             .map { contactNumber->
                 val intent=intentFunc(contactNumber)
@@ -265,14 +260,14 @@ class TalkAndResultUseCases @Inject constructor(
     }
 
     fun changeSelectedResult(requiredOperation:String,
-                             resultData: ResultsData,appComponent: HashMap<String, AppsDetails>,
+                             resultData: ResultsData,
                              message: String ):Observable<Intent>{
         val intent= when (requiredOperation) {
             "התקשר", "תתקשר", "תקשר", "call" -> {
                 callToIntent((resultData as ContactsData).number)
             }
             "spotify", "ספוטיפיי" -> {
-                searchInSpotifyIntent((resultData as PossibleMatches).match,appComponent)
+                searchInSpotifyIntent((resultData as PossibleMatches).match)
             }
             "youtube", "יוטיוב" -> {
                 searchInYoutubeIntent((resultData as PossibleMatches).match)
@@ -293,5 +288,14 @@ class TalkAndResultUseCases @Inject constructor(
             else->Intent()
         }
         return Observable.just(intent)
+    }
+    fun unmute(audioManager: AudioManager){
+        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC),AudioManager.FLAG_SHOW_UI );
+        audioManager.setStreamVolume(AudioManager.STREAM_RING,audioManager.getStreamMaxVolume(AudioManager.STREAM_RING),AudioManager.FLAG_SHOW_UI );
+    }
+
+    fun mute(audioManager: AudioManager) {
+        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,0,AudioManager.FLAG_SHOW_UI );
+        audioManager.setStreamVolume(AudioManager.STREAM_RING,0,AudioManager.FLAG_SHOW_UI );
     }
 }

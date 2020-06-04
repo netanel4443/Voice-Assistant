@@ -10,5 +10,4 @@ class OperationsWithoutImagesVH(view: View,
         operation.text=items.elementAt(position)
     }
 
-
 }
