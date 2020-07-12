@@ -6,14 +6,24 @@ import android.content.Intent
 import android.media.AudioManager
 import android.net.Uri
 import android.provider.MediaStore
+import android.util.Log
 import com.e.VoiceAssistant.di.annotations.ActivityScope
 import com.e.VoiceAssistant.ui.recyclerviews.datahelpers.ContactsData
 import com.e.VoiceAssistant.ui.recyclerviews.datahelpers.PossibleMatches
 import com.e.VoiceAssistant.ui.recyclerviews.datahelpers.ResultsData
 import com.e.VoiceAssistant.usecases.commons.RecognizerIntentInit
 import com.e.VoiceAssistant.userscollecteddata.AppsDetailsSingleton
+import com.e.VoiceAssistant.utils.printIfDebug
+import com.e.VoiceAssistant.utils.rxJavaUtils.subscribeOnIoAndObserveOnMain
+import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
+import org.kaldi.Assets
+import org.kaldi.Model
+import org.kaldi.Vosk
+import java.io.File
+import java.io.IOException
+import java.lang.Exception
 import java.util.*
 import javax.inject.Inject
 import kotlin.collections.HashSet
@@ -24,12 +34,14 @@ class TalkAndResultUseCases @Inject constructor(
     private val loadedData:AppsDetailsSingleton
 ) {
     private val requiredOperationsHset=
-        hashSetOf("הודעה","text","וואטסאפ","whatsapp","השתק","mute","umute","צליל",
+        hashSetOf("הודעה","text","וואטסאפ","whatsapp","השתק","mute","ring","צליל",
                   "youtube","יוטיוב","ספוטיפיי","spotify",
                   "call","התקשר","תקשר","תתקשר","search", "פתח","אופן","open","חפש")
     //todo fix send sms/whatsapp bug , sends sms  even if I canceled the second record
+    private var model:Model?=null
 
-    fun initRecognizerIntent():Single<Intent> {
+
+    fun initRecognizerIntent():Observable<Intent> {
         return  RecognizerIntentInit().init()
     }
 
@@ -297,5 +309,24 @@ class TalkAndResultUseCases @Inject constructor(
     fun mute(audioManager: AudioManager) {
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,0,AudioManager.FLAG_SHOW_UI );
         audioManager.setStreamVolume(AudioManager.STREAM_RING,0,AudioManager.FLAG_SHOW_UI );
+    }
+
+    fun getKaldiModel(assetDir: File):Single<Model> {
+       return Single.fromCallable {
+              try {
+                  printIfDebug("KaldiDemo", "Sync files in the folder $assetDir")
+                  Vosk.SetLogLevel(0)
+                  model=  Model("$assetDir/model-android")
+              }catch (e:Exception){
+                  printIfDebug("",e.message)
+              }
+           model
+        }
+    }
+
+    fun loadKaldiLibrary():Observable<Unit> {
+       return Observable.fromCallable {
+            System.loadLibrary("kaldi_jni")
+        }
     }
 }

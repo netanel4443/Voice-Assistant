@@ -23,6 +23,7 @@
      you can add it by clicking the floating button on your screen and then, click on the settings button.
      </string>
     <string name="permission_required">A permission is required in order to do that operation.</string>
+    <string name="skip_record_audio_permission">Without this permission, you will not be able to use the app.</string>
     <string name="settings">settings</string>
     <string name="menu">menu</string>
     <string name="dont_ask_again">OK, do not ask again</string>
@@ -37,17 +38,19 @@
     </string>
     <string name="floating_widget_permission">This permission is required in order to use this app.</string>
 
-    <string name="click_to_talk_or_stop">Click in order to talk or stop</string>
+    <string name="click_to_talk_or_stop">Click in order to talk or say \"Listen\"</string>
 
     <string-array name="operations_explanation">
-        <item>\u2022 Call Daniel</item>
-        <item>\u2022 Search best movies of the year</item>
-        <item>\u2022 Open calculator</item>
-        <item>\u2022 Spotify Eurovision Songs</item>
-        <item>\u2022 Youtube Eurovision Songs</item>
+        <item>\u2022 Call, Daniel</item>
+        <item>\u2022 Search, best movies of the year</item>
+        <item>\u2022 Open, calculator</item>
+        <item>\u2022 Spotify, Eurovision Songs</item>
+        <item>\u2022 Youtube, Eurovision Songs</item>
         <!--    <item>\u2022 Navigate to [The desired address]</item> -->
-            <item>\u2022 WhatsApp Dad [record your message on next record]</item>
-            <item>\u2022 Text My best friend [record your message on next record]</item>
+        <item>\u2022 WhatsApp, Dad [record your message on next record]</item>
+        <item>\u2022 Text, My best friend [record your message on next record]</item>
+        <item>\u2022 Mute [phone on vibrate mode. Media,notifications,system are silent]</item>
+        <item>\u2022 Ring [phone on ring mode. Media,notifications,system are at the highest volume]</item>
         </string-array>
 
         <string-array name="operations_keywords">
@@ -60,7 +63,7 @@
         <item>WhatsApp</item>
         <item>Text</item>
         <item>Mute</item>
-        <item>Unmute</item>
+        <item>Ring</item>
     </string-array>
 
     <integer-array name="operations_images">
@@ -76,7 +79,7 @@
         <item>@drawable/ic_baseline_volume_up_24</item>
     </integer-array>
 
-
-        <string name="record_in">Record a message in:</string>
-
-    </resources>
+    <string name="record_in">Record a message in:</string>
+    <string name="mic_is_busy">Mic is already in use</string>
+    <string name="retry">retry</string>
+</resources>

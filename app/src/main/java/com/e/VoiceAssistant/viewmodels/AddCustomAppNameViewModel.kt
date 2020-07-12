@@ -14,6 +14,7 @@ import com.e.VoiceAssistant.utils.printIfDebug
 import com.e.VoiceAssistant.utils.rxJavaUtils.subscribeOnIoAndObserveOnMain
 import com.e.VoiceAssistant.utils.rxJavaUtils.throttle
 import com.e.VoiceAssistant.viewmodels.states.AddCustomAppNameStates
+import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.subjects.PublishSubject
 import javax.inject.Inject
@@ -57,7 +58,7 @@ class AddCustomAppNameViewModel @Inject constructor(
         state.value = AddCustomAppNameStates.ApplySelectedApp(appsDetails)
     }
 
-    fun initRecognizerIntent(): Single<Intent> {
+    fun initRecognizerIntent(): Observable<Intent> {
         return useCases.initRecognizerIntent()
     }
 
