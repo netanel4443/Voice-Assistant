@@ -9,6 +9,7 @@ class AppsDetailsSingleton @Inject constructor() {
     val appsDetailsHmap=HashMap<String,AppsDetails>()
     val storedAppsDetailsFromDB=HashMap<String,AppsDetails>()
     val appsAndStoredAppsDetails=HashMap<String,AppsDetails>()
+    val contactList=HashMap<String, String>()
     var countryLocaleDigits=""
 }
 

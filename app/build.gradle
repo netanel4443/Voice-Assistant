@@ -17,8 +17,8 @@ android {
         minSdkVersion 21
         targetSdkVersion 29
         multiDexEnabled = true
-        versionCode 7
-        versionName "1.2.1"
+        versionCode 9
+        versionName "1.4"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -30,6 +30,9 @@ android {
 }
 
 dependencies {
+    implementation project(':aars')
+    implementation project(':models')
+
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.1.0'
@@ -74,7 +77,7 @@ dependencies {
     //Admob
     implementation 'com.google.android.gms:play-services-ads:19.1.0'
     //memory leaks detection
-   //  debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.0-alpha-3'
+   //debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.0-alpha-3'
     //dagger2
     implementation "com.google.dagger:dagger:2.27"
     implementation "com.google.dagger:dagger-android:2.27"

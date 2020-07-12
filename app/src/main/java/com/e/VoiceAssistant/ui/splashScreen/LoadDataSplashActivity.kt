@@ -29,7 +29,9 @@ class LoadDataSplashActivity : BaseActivity() {
          /*we check this because the user can click on the app again an the data will be reload*/
 //        if (appsDetailsSingleton.countryLocaleDigits.isEmpty()) {
             setRxObserver()
-            viewModel.getData(this.packageManager,this.resources)
+         //   viewModel.getData(this.packageManager,this.resources)
+               startSpeechRecognizerService()
+
 //        } else{
 //            finish()
 //        }
@@ -38,30 +40,13 @@ class LoadDataSplashActivity : BaseActivity() {
     private fun setRxObserver() {
         +viewModel.commands.subscribe { commands->
             when(commands){
-                is LoadDataCommands.GetDeviceApps-> initAppsDetails(commands.list)
-                is LoadDataCommands.StoredAppsDetails-> addSavedAppsFromMemoryToList(commands.list)
-                is LoadDataCommands.GetCurrentLocaleDigits-> getLocaleDigits(commands.digits)
                 is LoadDataCommands.LoadComplete-> onLoadDataComplete()
             }
         }
     }
 
-    private fun getLocaleDigits(digits: String) {
-        appsDetailsSingleton.countryLocaleDigits=digits
-    }
-
-    private fun initAppsDetails(apps: HashMap<String, AppsDetails>) {
-        appsDetailsSingleton.appsDetailsHmap.putAll(apps)
-        appsDetailsSingleton.appsAndStoredAppsDetails.putAll(apps)
-    }
-
-    private fun addSavedAppsFromMemoryToList(list:HashMap<String, AppsDetails>) {
-        appsDetailsSingleton.storedAppsDetailsFromDB.putAll(list)
-        appsDetailsSingleton.appsAndStoredAppsDetails.putAll(list)
-    }
-
     private fun onLoadDataComplete(){
-        startSpeechRecognizerService()
+        startServiceAndFinishActivity()
     }
 
     private fun startSpeechRecognizerService(){
@@ -83,22 +68,20 @@ class LoadDataSplashActivity : BaseActivity() {
            rxPermissions.requestEach(permission.RECORD_AUDIO)
             .doOnNext {
                  when {
-                    it.granted -> {
-                         startServiceAndFinishActivity()
-                    }
-                    it.shouldShowRequestPermissionRationale -> {
-                        startServiceAndFinishActivity()
-                    }
+                    it.granted -> { }
+                    it.shouldShowRequestPermissionRationale -> { }
                     else -> {
                         toastLong(R.string.permission_ask_never_again)
                         finishAndRemoveTask()
                     }
                 }
+                //if its not permenant disable of RECORD_AUDIO this line will be executed
+                viewModel.getData(this.packageManager,resources)
             }
                compositeDisposable.add(rxPermissions.requestEach(permission.READ_CONTACTS)
                    .doOnNext {
                        when {
-                           it.granted ->{}
+                           it.granted ->{viewModel.addCotnactObservable(contentResolver)}
                            it.shouldShowRequestPermissionRationale ->{}
                            else ->  toastLong(R.string.permission_ask_never_again)
                        }

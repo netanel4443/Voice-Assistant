@@ -7,13 +7,14 @@ import com.e.VoiceAssistant.data.repo.RealmRepo
 import com.e.VoiceAssistant.di.annotations.ActivityScope
 import com.e.VoiceAssistant.usecases.commons.RecognizerIntentInit
 import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.Single
 import javax.inject.Inject
 
 @ActivityScope
 class SpeechRecognitionUseCases @Inject constructor(private val repo: RealmRepo) {
 
-    fun initRecognizerIntent(): Single<Intent> {
+    fun initRecognizerIntent(): Observable<Intent> {
         return RecognizerIntentInit().init()
     }
 

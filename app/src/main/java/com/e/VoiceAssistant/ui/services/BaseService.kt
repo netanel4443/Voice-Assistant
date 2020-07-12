@@ -4,7 +4,7 @@ import dagger.android.DaggerService
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 
-abstract class BaseService:DaggerService() {
+abstract class BaseService: DaggerService() {
 
     protected val compositeDisposable= CompositeDisposable()
 

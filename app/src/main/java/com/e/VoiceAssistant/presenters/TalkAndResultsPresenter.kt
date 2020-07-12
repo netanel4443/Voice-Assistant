@@ -18,6 +18,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import org.kaldi.Model
+import java.io.File
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -38,8 +40,25 @@ class TalkAndResultsPresenter@Inject constructor(
 
     fun bindView(view: TalkAndResultsPresenterView){ this.view=view }
 
-    fun initRecognizerIntent(): Single<Intent> {
-        return useCases.initRecognizerIntent()
+    fun globalInits(){
+        val first= useCases.loadKaldiLibrary()
+
+        val second = useCases.initRecognizerIntent()
+            .doOnNext{intent->
+                println ("are you here at intent?")
+                view.setIntent(intent)
+            }
+
+        val observableList = arrayListOf(second, first)
+
+        +Observable.combineLatest(observableList) {}
+            .subscribeOnIoAndObserveOnMain()
+            .subscribe({
+                /*according to docs this should be initialized on mainThread after inits are completed*/
+                view.initSpeechRecognizer()
+                //should happen after we load kaldi_jni library (we initialize it at the activity's usecases class)
+                view.startKaldiRecognizer()
+            }, {})
     }
 
     fun handleTalkOrStopClick() {
@@ -169,12 +188,8 @@ class TalkAndResultsPresenter@Inject constructor(
     fun requiredOperationIsMuteOrUnmute(audioManager: AudioManager){
         when (operation) {
             "mute", "השתק" -> { useCases.mute(audioManager)   }
-            "unmute","צליל" -> { useCases.unmute(audioManager) }
+            "ring","צליל" -> { useCases.unmute(audioManager) }
         }
-    }
-
-    fun requiredOperationIsUnmute(audioManager: AudioManager){
-        useCases.unmute(audioManager)
     }
 
     private fun checkRequestedOperation(
@@ -204,7 +219,7 @@ class TalkAndResultsPresenter@Inject constructor(
             "וואטסאפ", "whatsapp" -> {
                 requiredOperationIsWhatsApp(matches,requiredOperation,contactList)
             }
-            "השתק","mute","צליל","unmute"->{
+            "השתק","mute","צליל","ring"->{
               view.muteOrUnmute()
             }
             else -> {
@@ -237,6 +252,10 @@ class TalkAndResultsPresenter@Inject constructor(
             }.repeat(3)
             .observeOn(AndroidSchedulers.mainThread())
             .filter {count-> count==0 }
+    }
+
+    fun getKaldiModel(assetsDir: File):Single<Model>{
+       return useCases.getKaldiModel(assetsDir)
     }
 
     private operator fun Disposable.unaryPlus(){
