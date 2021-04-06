@@ -17,6 +17,10 @@ buildscript {
 
         //Realm DB
         classpath "io.realm:realm-gradle-plugin:7.0.0-beta-SNAPSHOT"
+
+        //sonarqube
+        classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.8"
+
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }

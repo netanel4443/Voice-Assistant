@@ -6,6 +6,7 @@ import com.e.VoiceAssistant.di.annotations.ActivityScope
 import com.e.VoiceAssistant.di.annotations.ViewModelKey
 import com.e.VoiceAssistant.di.viewmodels.ViewModelProviderFactory
 import com.e.VoiceAssistant.viewmodels.AddCustomAppNameViewModel
+import com.e.VoiceAssistant.viewmodels.TalkAndResultViewModel
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap
@@ -17,5 +18,10 @@ abstract class ViewModelsModule {
     @IntoMap
     @ViewModelKey(AddCustomAppNameViewModel::class)
     abstract fun bindSpeechRecognitionViewModel(addCustomAppNameViewModel: AddCustomAppNameViewModel):ViewModel
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(TalkAndResultViewModel::class)
+    abstract fun bindTalkAndResultViewModel(talkAndResultViewModel: TalkAndResultViewModel):ViewModel
 
 }

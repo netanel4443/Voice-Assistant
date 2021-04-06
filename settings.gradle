@@ -1,3 +1,3 @@
 include ':app'
-rootProject.name='KotlinExamples'
+rootProject.name='VoiceAssistant'
 include ':models', ':aars', ':app'

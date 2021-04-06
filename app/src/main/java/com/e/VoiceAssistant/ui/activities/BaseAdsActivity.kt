@@ -1,6 +1,8 @@
 package com.e.VoiceAssistant.ui.activities
 
 import android.widget.FrameLayout
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.e.VoiceAssistant.ui.ads.Adrequest
 import com.e.VoiceAssistant.ui.dialogs.CircleProgressBarDialog
 import com.e.VoiceAssistant.utils.printIfDebug
@@ -9,15 +11,17 @@ import com.google.android.gms.ads.AdView
 import dagger.android.support.DaggerAppCompatActivity
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
+import javax.inject.Inject
 
 abstract class BaseAdsActivity:DaggerAppCompatActivity() {
 
     protected val compositeDisposable=CompositeDisposable()
     private var ad:AdView?=null
-    //    @Inject lateinit var provider:ViewModelProvider.Factory
-//
-//    protected inline fun <reified T : ViewModel> getViewModel(): T =
-//       ViewModelProvider(this , provider)[T::class.java]
+        @Inject
+        lateinit var provider: ViewModelProvider.Factory
+
+    protected inline fun <reified T : ViewModel> getViewModel(): T =
+       ViewModelProvider(this , provider)[T::class.java]
 
     protected fun loadAd(adLayout: FrameLayout,adUnitId:String){
       val ad=AdView(this)

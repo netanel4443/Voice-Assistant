@@ -3,7 +3,6 @@ package com.e.VoiceAssistant.usecases
 import android.content.ComponentName
 import android.content.Intent
 import com.e.VoiceAssistant.data.AppsDetails
-import com.e.VoiceAssistant.data.ComponentObject
 import com.e.VoiceAssistant.di.annotations.ActivityScope
 import io.reactivex.Observable
 import javax.inject.Inject
@@ -18,7 +17,7 @@ class OpenDesiredAppPresenterUseCase @Inject constructor(){
             var pckg=""
 
             appComponent.keys.forEach { key ->
-
+                println("key $key")
                 var tmpResults=""
                 var tmpResult =""
                 val iterator = splitedResultsLhset.iterator()
@@ -50,14 +49,16 @@ class OpenDesiredAppPresenterUseCase @Inject constructor(){
             }
 
             val intent=navigateToDesiredApp(pckg,appComponent)
+
             return  Observable.just(intent)
     }
 
-    private fun navigateToDesiredApp(pckg: String,appComponent:HashMap<String, AppsDetails>): Intent {
-      //    println("pckggg $pckg")
+    private fun navigateToDesiredApp(appName: String, appComponent:HashMap<String, AppsDetails>): Intent {
+//          println("appName $appName")
             var intent = Intent()
+//        println("intentt ${appComponent[appName]?.activity} ${appComponent[appName]?.pckg}")
+            appComponent[appName]?.run {
 
-            appComponent[pckg]?.run {
                val component=ComponentName(this.activity,this.pckg)
                intent= Intent(Intent.ACTION_MAIN)
                intent.addCategory(Intent.CATEGORY_LAUNCHER)

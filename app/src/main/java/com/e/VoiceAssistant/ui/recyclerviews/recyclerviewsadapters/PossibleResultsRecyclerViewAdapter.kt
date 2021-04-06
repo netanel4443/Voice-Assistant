@@ -10,16 +10,6 @@ import com.e.VoiceAssistant.ui.recyclerviews.datahelpers.ResultsData
 import com.e.VoiceAssistant.ui.recyclerviews.viewholders.BaseViewHolder
 import com.e.VoiceAssistant.ui.recyclerviews.viewholders.PossibleContactsResultsViewHolder
 import com.e.VoiceAssistant.ui.recyclerviews.viewholders.PossibleMatchesViewHolder
-import com.e.VoiceAssistant.utils.printIfDebug
-import com.e.VoiceAssistant.utils.rxJavaUtils.throttle
-import com.jakewharton.rxbinding3.view.clicks
-import io.reactivex.Observable
-import io.reactivex.Single
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
-import io.reactivex.rxkotlin.plusAssign
-import java.util.*
-import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 
 class PossibleResultsRecyclerViewAdapter():RecyclerView.Adapter<BaseViewHolder>() {
@@ -30,8 +20,8 @@ class PossibleResultsRecyclerViewAdapter():RecyclerView.Adapter<BaseViewHolder>(
 
     fun attachData(data:HashSet<ResultsData>,type:Int,intent: Intent){
         this.intent=intent
-         attachData(data,type)
-   }
+        attachData(data,type)
+    }
 
     fun attachData(data:HashSet<ResultsData>,type:Int){
         dataType=type
@@ -46,13 +36,13 @@ class PossibleResultsRecyclerViewAdapter():RecyclerView.Adapter<BaseViewHolder>(
         val holder= when(viewType){
             0->{
                 view=inflater.inflate(R.layout.possible_contacts_results_recycler_design,parent,false)
-                val viewHolder= PossibleContactsResultsViewHolder(view,items,intent,parent)
+                val viewHolder= PossibleContactsResultsViewHolder(view,items,parent)
                 viewHolder.itemClick={itemClick?.invoke(it)}
                 viewHolder
             }
             else->{
                 view= inflater.inflate(R.layout.possible_matches_recycler_design,parent,false)
-                val viewHolder=PossibleMatchesViewHolder(view,items,intent,parent)
+                val viewHolder=PossibleMatchesViewHolder(view,items,parent)
                 viewHolder.itemClick={itemClick?.invoke(it)}
                 viewHolder
             }

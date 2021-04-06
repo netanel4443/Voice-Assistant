@@ -5,8 +5,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/talk_and_result_background"
-    tools:context=".ui.activities.TalkAndResultsActivity"
+    android:background="#1e1e1e"
+    tools:context=".ui.activities.TalkAndResultsActivityMvi"
     android:keepScreenOn="true">
 
     <androidx.cardview.widget.CardView
@@ -18,7 +18,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:background="#504F4F">
+            android:background="#1e1e1e">
 
             <Button
                 android:layout_width="30dp"

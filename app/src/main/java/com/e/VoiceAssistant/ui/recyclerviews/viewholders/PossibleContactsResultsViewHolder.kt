@@ -1,22 +1,16 @@
 package com.e.VoiceAssistant.ui.recyclerviews.viewholders
 
 import android.content.Intent
-import android.graphics.Color
 import android.view.View
 import android.view.ViewGroup
 import com.e.VoiceAssistant.ui.recyclerviews.datahelpers.ContactsData
 import com.e.VoiceAssistant.ui.recyclerviews.datahelpers.ResultsData
-import com.e.VoiceAssistant.utils.printIfDebug
-import com.e.VoiceAssistant.utils.rxJavaUtils.throttle
-import com.jakewharton.rxbinding3.view.clicks
-import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.possible_contacts_results_recycler_design.view.*
-import java.util.concurrent.TimeUnit
 
 class PossibleContactsResultsViewHolder(
                                         itemView: View,
                                         items:HashSet<ResultsData>,
-                                        val intent: Intent,
+//                                        val intent: Intent,
                                         val parent: ViewGroup) :BaseViewHolder(itemView) {
     var itemClick:((ResultsData)->Unit)?=null
     val items=items as HashSet<ContactsData>

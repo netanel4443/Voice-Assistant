@@ -40,7 +40,6 @@ class TalkAndResultUseCases @Inject constructor(
     //todo fix send sms/whatsapp bug , sends sms  even if I canceled the second record
     private var model:Model?=null
 
-
     fun initRecognizerIntent():Observable<Intent> {
         return  RecognizerIntentInit().init()
     }
@@ -232,6 +231,7 @@ class TalkAndResultUseCases @Inject constructor(
         }
         return finalResult
     }
+
     private fun findContact(matches: ArrayList<String>,
                             contactList: HashMap<String, String>,
                             requiredOperation: String,

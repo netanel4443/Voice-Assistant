@@ -20,7 +20,8 @@ class LoadDataUseCase @Inject constructor(
     fun getAppsListFromDB(): Single<HashMap<String, SavedAppsDetails>> {
         return repo.getAppsList()
     }
-
+    /*when a user saves a custom name for an app, we save the app's details with the custom name
+     to the database, but with no icon.  so we need to get the proper icon for the apps*/
     fun addToSavedAppsProperIcon(
         list: HashMap<String, SavedAppsDetails>,
         appsDetailsHmap: HashMap<String, AppsDetails>
@@ -28,7 +29,6 @@ class LoadDataUseCase @Inject constructor(
         val appListToDelete = ArrayList<String>()
         return Single.fromCallable {
             val addedApps = HashMap<String, AppsDetails>()
-            //val appsDetails=AppsDetails()//todo check if can be initialized once
             list.forEach {
                 val realAppName = it.value.realName
                 val newName = it.key
@@ -38,13 +38,15 @@ class LoadDataUseCase @Inject constructor(
                     val icon = appsDetailsHmap[realAppName]!!.icon
                     val appsDetails = AppsDetails(realAppName, pckg, activityName, icon)
                     addedApps[newName] = appsDetails
-                } else
-                /* if a user deleted an app for his device we won't
-                show its name to it and remove it from the database to prevent bugs.*/
+                } else{
+                    /** if a user deleted an app which he gave it a custom name (in [AddCustomAppNameActivity]),
+                     we need to delete it from his database to prevent bugs.*/
                     appListToDelete.add(newName)
+                }
             }
             addedApps
-        }.flatMap { deleteApps(appListToDelete).toSingleDefault(it) }
+        }
+            .flatMap { deleteApps(appListToDelete).toSingleDefault(it) }
     }
 
     private fun deleteApps(list:ArrayList<String>): Completable {

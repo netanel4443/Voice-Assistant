@@ -3,6 +3,7 @@ package com.e.VoiceAssistant.di
 import com.google.android.gms.ads.MobileAds
 import dagger.android.AndroidInjector
 import dagger.android.DaggerApplication
+import dagger.android.HasAndroidInjector
 import io.realm.Realm
 
 class BaseApplication : DaggerApplication() {

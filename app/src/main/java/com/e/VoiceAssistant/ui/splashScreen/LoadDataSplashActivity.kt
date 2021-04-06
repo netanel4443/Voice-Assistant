@@ -2,6 +2,7 @@ package com.e.VoiceAssistant.ui.splashScreen
 
 import android.Manifest.permission
 import android.content.Intent
+import android.media.MediaRecorder
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -39,6 +40,7 @@ class LoadDataSplashActivity : BaseActivity() {
 
     private fun setRxObserver() {
         +viewModel.commands.subscribe { commands->
+            println("im here tests")
             when(commands){
                 is LoadDataCommands.LoadComplete-> onLoadDataComplete()
             }

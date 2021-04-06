@@ -4,7 +4,7 @@ import com.e.VoiceAssistant.ui.activities.AddCustomAppNameActivity
 import com.e.VoiceAssistant.di.annotations.ActivityScope
 import com.e.VoiceAssistant.di.modules.ViewModelFactoryModule
 import com.e.VoiceAssistant.di.modules.ViewModelsModule
-import com.e.VoiceAssistant.ui.activities.TalkAndResultsActivity
+import com.e.VoiceAssistant.ui.activities.TalkAndResultsActivityMvi
 import com.e.VoiceAssistant.ui.onboarding.OnBoardingActivity
 import com.e.VoiceAssistant.ui.splashScreen.LoadDataSplashActivity
 import dagger.Module
@@ -23,6 +23,14 @@ abstract class ActivitiesBuilders {
 
     @ActivityScope
     @ContributesAndroidInjector(
+        modules = [  ViewModelsModule::class,
+                     ViewModelFactoryModule::class
+                  ]
+    )
+    abstract fun contributeTalkAndResultActivityMvi():TalkAndResultsActivityMvi
+
+    @ActivityScope
+    @ContributesAndroidInjector(
         modules = [ViewModelFactoryModule::class
         ])
     abstract fun contributeOnBoardingActivity():OnBoardingActivity
@@ -33,8 +41,5 @@ abstract class ActivitiesBuilders {
         ])
     abstract fun contributeLoadDataSplashActivity(): LoadDataSplashActivity
 
-    @ActivityScope
-    @ContributesAndroidInjector
-    abstract fun contributeTalkAndResultsActivity(): TalkAndResultsActivity
 
 }

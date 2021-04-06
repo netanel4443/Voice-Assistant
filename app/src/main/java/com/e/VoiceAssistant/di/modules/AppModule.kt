@@ -14,7 +14,7 @@ import javax.inject.Singleton
 @Module
 object AppModule {
 
-    @Provides @AppScope @JvmStatic
+    @Provides @JvmStatic @AppScope
     fun provideApplication(app: Application): Context = app.applicationContext
 
 

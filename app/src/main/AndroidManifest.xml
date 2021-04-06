@@ -19,7 +19,7 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
 
-        <activity android:name=".ui.activities.TalkAndResultsActivity"
+        <activity android:name=".ui.activities.TalkAndResultsActivityMvi"
             android:theme="@style/Theme.AppCompat.SemiTransparent"/>
 
         <activity

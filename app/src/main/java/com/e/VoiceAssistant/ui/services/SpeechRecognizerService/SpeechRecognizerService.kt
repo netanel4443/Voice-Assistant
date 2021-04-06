@@ -19,7 +19,7 @@ import com.e.VoiceAssistant.R
 import com.e.VoiceAssistant.presenters.SpeechRecognizerServicePresenter
 import com.e.VoiceAssistant.presenters.presentersStates.SpeechRecognizerServicePresenterState
 import com.e.VoiceAssistant.ui.activities.AddCustomAppNameActivity
-import com.e.VoiceAssistant.ui.activities.TalkAndResultsActivity
+import com.e.VoiceAssistant.ui.activities.TalkAndResultsActivityMvi
 import com.e.VoiceAssistant.ui.dialogs.FloatingRepresentOperationsDialog
 import com.e.VoiceAssistant.ui.onboarding.OnBoardingActivity
 import com.e.VoiceAssistant.ui.services.BaseService
@@ -88,7 +88,7 @@ class SpeechRecognizerService : BaseService(), SpeechRecognizerServicePresenterS
             }
             is TouchHelper.TalkOrStopClickEvent -> {
                 presenter.showOrDismissTrash(parenOfTrashImage.visibility)
-                val intent=Intent(this,TalkAndResultsActivity::class.java)
+                val intent=Intent(this,TalkAndResultsActivityMvi::class.java)
                 navigateToDesiredApp(intent)
             }
         }
@@ -134,7 +134,7 @@ class SpeechRecognizerService : BaseService(), SpeechRecognizerServicePresenterS
 
     private fun initAppAndPackageList() {
         presenter.initWindowManager()
-        FloatingRepresentOperationsDialog(this).show()
+//        FloatingRepresentOperationsDialog(this).show()
     }
 
     override fun initWindowManager(params: WindowManager.LayoutParams,

@@ -5,8 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:id="@+id/contactDetailsCardView"
-    app:cardUseCompatPadding="true"
-    android:elevation="10dp">
+    android:layout_marginBottom="5dp"
+    app:cardBackgroundColor="#20222B">
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -14,7 +14,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/contactNameTview"
-            android:textColor="#000"
+            android:textColor="#fff"
             android:textSize="20sp"
             android:fontFamily="@font/davidlibre"
             app:layout_constraintTop_toTopOf="parent"/>
@@ -22,6 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/contactNumberTview"
+            android:textColor="#03A9F4"
             android:fontFamily="@font/davidlibre"
             android:layout_gravity="bottom"
             app:layout_constraintTop_toBottomOf="@+id/contactNameTview"/>
